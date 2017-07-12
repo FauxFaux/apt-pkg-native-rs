@@ -1,0 +1,9 @@
+[package]
+name = "apt-native"
+version = "0.1.0"
+authors = ["Chris West (Faux) <git@goeswhere.com>"]
+
+[dependencies]
+
+[build-dependencies]
+bindgen = "0.26.3"
