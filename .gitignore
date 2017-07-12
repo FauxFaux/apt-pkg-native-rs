@@ -3,3 +3,5 @@
 Cargo.lock
 .idea
 *.iml
+apt-c/lib.o
+apt-c/libapt-c.a

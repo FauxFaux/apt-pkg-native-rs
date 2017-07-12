@@ -4,6 +4,4 @@ version = "0.1.0"
 authors = ["Chris West (Faux) <git@goeswhere.com>"]
 
 [dependencies]
-
-[build-dependencies]
-bindgen = "0.26.3"
+libc = "0.2.26"
