@@ -13,8 +13,7 @@
 //! a bit more like Rust `Iterator`s, but is crippled by the insanity.
 //!
 //! Methods which "find" something will reposition one of these "iterators" at the right place
-//! in an existing stream of items. Note that currently you don't technically need to call
-//! `next()` before observing the result of a `find..()`, but hopefully this will be fixed.
+//! in an existing stream of items.
 //!
 //! I recommend using `.map()` to turn an "iterator" into a Rust type as soon as possible.
 //! The returned map-like thing *is* a Rust `Iterator`, so you can do normal operations on it.
@@ -25,7 +24,7 @@
 //!
 //! ```rust,no_run
 //! extern crate apt_pkg_native;
-//! let cache = apt_pkg_native::Cache::get_singleton();
+//! let mut cache = apt_pkg_native::Cache::get_singleton();
 //! let total_packages = cache.iter().map(|_| ()).count();
 //! ```
 //!
@@ -63,20 +62,14 @@ mod tests {
             panic!("not found!");
         }
 
-        assert!(cache.find_by_name(
-            "this-package-doesnt-exist-and-if-someone-makes-it-ill-be-really-angry",
-        ).next().is_none());
+        assert!(
+            cache
+                .find_by_name(
+                    "this-package-doesnt-exist-and-if-someone-makes-it-ill-be-really-angry",
+                )
+                .next()
+                .is_none()
+        );
 
-    }
-
-    // TODO: this should not even remotely compile
-    #[test]
-    fn demonstrate_insane_iterator_behaviour() {
-        let mut cache = Cache::get_singleton();
-        let mut it = cache.iter();
-        let first = it.next().unwrap();
-        let second = it.next().unwrap();
-        assert_eq!(first.arch(), second.arch());
-        assert_eq!(first.name(), second.name());
     }
 }

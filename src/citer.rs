@@ -1,3 +1,6 @@
+use std::ops::Deref;
+use std::marker::PhantomData;
+
 pub trait RawIterator {
     type View;
 
@@ -26,11 +29,30 @@ where
     }
 }
 
+pub struct Borrowed<'i, R>
+where
+    R: 'i + RawIterator,
+{
+    it: PhantomData<&'i CIterator<R>>,
+    val: R::View,
+}
+
+impl<'i, R> Deref for Borrowed<'i, R>
+where
+    R: RawIterator,
+{
+    type Target = R::View;
+
+    fn deref(&self) -> &R::View {
+        &self.val
+    }
+}
+
 impl<R> CIterator<R>
 where
     R: RawIterator,
 {
-    pub fn next(&mut self) -> Option<R::View> {
+    pub fn next<'i>(&mut self) -> Option<Borrowed<R>> {
         if self.raw.is_end() {
             return None;
         }
@@ -45,7 +67,10 @@ where
         if self.raw.is_end() {
             None
         } else {
-            Some(self.raw.as_view())
+            Some(Borrowed {
+                it: PhantomData,
+                val: self.raw.as_view(),
+            })
         }
     }
 
