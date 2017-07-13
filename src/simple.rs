@@ -9,7 +9,7 @@ pub struct BinaryPackage {
 }
 
 impl BinaryPackage {
-    pub fn new(iter: &sane::PkgIterator) -> Self {
+    pub fn new(iter: &sane::PkgView) -> Self {
         BinaryPackage {
             name: iter.name(),
             arch: iter.arch(),
@@ -29,7 +29,7 @@ pub struct Version {
 
 
 impl Version {
-    pub fn new(iter: &sane::VerIterator) -> Self {
+    pub fn new(iter: &sane::VerView) -> Self {
         Version {
             version: iter.version(),
             arch: iter.arch(),

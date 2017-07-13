@@ -1,8 +1,11 @@
 use std::marker::PhantomData;
 use std::ffi;
 
+use citer;
 use libc;
 use raw;
+
+use citer::CIterator;
 
 /// A reference to the package cache singleton,
 /// from which most functionality can be accessed.
@@ -22,13 +25,12 @@ impl Cache {
     /// If there are multiple architectures, multiple architectures will be returned.
     ///
     /// See the module documentation for apologies about how this isn't an iterator.
-    pub fn iter(&mut self) -> PkgIterator {
+    pub fn iter(&mut self) -> CIterator<PkgIterator> {
         unsafe {
-            PkgIterator {
-                cache: self,
-                first: true,
-                ptr: raw::pkg_cache_pkg_iter(self.ptr),
-            }
+            PkgIterator::new(
+                self,
+                raw::pkg_cache_pkg_iter(self.ptr),
+            )
         }
     }
 
@@ -36,31 +38,29 @@ impl Cache {
     /// or the primary one.
     ///
     /// The returned iterator will either be at the end, or at a package with the name.
-    pub fn find_by_name(&mut self, name: &str) -> PkgIterator {
+    pub fn find_by_name(&mut self, name: &str) -> CIterator<PkgIterator> {
         unsafe {
             let name = ffi::CString::new(name).unwrap();
             let ptr = raw::pkg_cache_find_name(self.ptr, name.as_ptr());
-            PkgIterator {
-                cache: self,
-                first: true,
+            PkgIterator::new(
+                self,
                 ptr,
-            }
+            )
         }
     }
 
     /// Find a package by name and architecture.
     ///
     /// The returned iterator will either be at the end, or at a matching package.
-    pub fn find_by_name_arch(&mut self, name: &str, arch: &str) -> PkgIterator {
+    pub fn find_by_name_arch(&mut self, name: &str, arch: &str) -> CIterator<PkgIterator> {
         unsafe {
             let name = ffi::CString::new(name).unwrap();
             let arch = ffi::CString::new(arch).unwrap();
             let ptr = raw::pkg_cache_find_name_arch(self.ptr, name.as_ptr(), arch.as_ptr());
-            PkgIterator {
-                cache: self,
-                first: true,
+            PkgIterator::new(
+                self,
                 ptr,
-            }
+            )
         }
     }
 }
@@ -69,56 +69,63 @@ impl Cache {
 #[derive(Debug)]
 pub struct PkgIterator<'c> {
     cache: &'c Cache,
-    first: bool,
     ptr: raw::PPkgIterator,
 }
 
-impl<'c> Drop for PkgIterator<'c> {
-    fn drop(&mut self) {
-        unsafe { raw::pkg_iter_release(self.ptr) }
+impl<'c> PkgIterator<'c> {
+    fn new(cache: &'c Cache, ptr: raw::PCache) -> citer::CIterator<Self> {
+        citer::CIterator {
+            first: true,
+            raw: PkgIterator{
+                cache,
+                ptr
+            }
+        }
     }
 }
 
-/// Iterator-like interface
-impl<'c> PkgIterator<'c> {
-    pub fn next(&mut self) -> Option<&Self> {
+// TODO: could this be a ref to the iterator?
+// TODO: Can't get the lifetimes to work.
+pub struct PkgView<'c> {
+    ptr: raw::PPkgIterator,
+    cache: &'c Cache,
+}
+
+impl<'c> citer::RawIterator for PkgIterator<'c> {
+    type View = PkgView<'c>;
+
+    fn is_end(&self) -> bool {
         unsafe {
-            // we were at the end last time, leave us alone!
-            if self.is_empty() {
-                return None;
-            }
-
-            if !self.first {
-                raw::pkg_iter_next(self.ptr);
-            }
-
-            self.first = false;
-
-            // we don't want to observe the end marker
-            if self.is_empty() { None } else { Some(self) }
+            raw::pkg_iter_end(self.ptr)
         }
     }
 
-    /// Check if we're at the end of the iteration.
-    /// Not useful/necessary if you're using `next()`,
-    /// but useful for `find_..`.
-    pub fn is_empty(&self) -> bool {
-        // TODO: Can we get this inlined such that all the asserts will be eliminated?
-        unsafe { raw::pkg_iter_end(self.ptr) }
+    fn next(&mut self) {
+        unsafe {
+            raw::pkg_iter_next(self.ptr)
+        }
     }
 
-    pub fn map<F, B>(self, f: F) -> PkgMap<'c, F>
-    where
-        F: FnMut(&PkgIterator) -> B,
-    {
-        PkgMap { it: self, f }
+    fn as_view(&self) -> Self::View {
+        assert!(!self.is_end());
+
+        PkgView {
+            ptr: self.ptr,
+            cache: self.cache,
+        }
+    }
+
+    fn release(&mut self) {
+        unsafe {
+            raw::pkg_iter_release(self.ptr)
+        }
     }
 }
 
+
 /// Actual accessors
-impl<'c> PkgIterator<'c> {
+impl<'c> PkgView<'c> {
     pub fn name(&self) -> String {
-        assert!(!self.is_empty());
         unsafe {
             make_owned_ascii_string(raw::pkg_iter_name(self.ptr))
                 .expect("packages always have names")
@@ -126,7 +133,6 @@ impl<'c> PkgIterator<'c> {
     }
 
     pub fn arch(&self) -> String {
-        assert!(!self.is_empty());
         unsafe {
             make_owned_ascii_string(raw::pkg_iter_arch(self.ptr))
                 .expect("packages always have architectures")
@@ -134,17 +140,14 @@ impl<'c> PkgIterator<'c> {
     }
 
     pub fn current_version(&self) -> Option<String> {
-        assert!(!self.is_empty());
         unsafe { make_owned_ascii_string(raw::pkg_iter_current_version(self.ptr)) }
     }
 
     pub fn candidate_version(&self) -> Option<String> {
-        assert!(!self.is_empty());
         unsafe { make_owned_ascii_string(raw::pkg_iter_candidate_version(self.ptr)) }
     }
 
     pub fn pretty_print(&self) -> String {
-        assert!(!self.is_empty());
         unsafe {
             let ptr = raw::pkg_iter_pretty(self.cache.ptr, self.ptr);
             let result = ffi::CStr::from_ptr(ptr)
@@ -156,100 +159,63 @@ impl<'c> PkgIterator<'c> {
         }
     }
 
-    pub fn versions(&self) -> VerIterator {
-        VerIterator {
-            cache: PhantomData,
+    pub fn versions(&self) -> CIterator<VerIterator> {
+        CIterator {
             first: true,
-            ptr: unsafe { raw::pkg_iter_ver_iter(self.ptr) },
+            raw: VerIterator {
+                cache: PhantomData,
+                ptr: unsafe { raw::pkg_iter_ver_iter(self.ptr) },
+            }
         }
-    }
-}
-
-#[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
-pub struct PkgMap<'c, F> {
-    it: PkgIterator<'c>,
-    f: F,
-}
-
-impl<'c, B, F> Iterator for PkgMap<'c, F>
-where
-    F: FnMut(&PkgIterator) -> B,
-{
-    type Item = B;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.it.next().map(&mut self.f)
     }
 }
 
 /// An "iterator"/pointer to a point in a version list.
 pub struct VerIterator<'c> {
     cache: PhantomData<&'c Cache>,
-    first: bool,
     ptr: raw::PVerIterator,
 }
 
-impl<'c> Drop for VerIterator<'c> {
-    fn drop(&mut self) {
-        unsafe { raw::ver_iter_release(self.ptr) }
-    }
+// TODO: could this be a ref to the iterator?
+// TODO: Can't get the lifetimes to work.
+pub struct VerView<'c> {
+    cache: PhantomData<&'c Cache>,
+    ptr: raw::PVerIterator,
 }
 
-/// Iterator-like interface
-impl<'c> VerIterator<'c> {
-    pub fn next(&mut self) -> Option<&Self> {
+impl<'c> citer::RawIterator for VerIterator<'c> {
+    type View = VerView<'c>;
+
+    fn is_end(&self) -> bool {
         unsafe {
-            // we were at the end last time, leave us alone!
-            if self.is_empty() {
-                return None;
-            }
-
-            if !self.first {
-                raw::ver_iter_next(self.ptr);
-            }
-
-            self.first = false;
-
-            // we don't want to observe the end marker
-            if self.is_empty() { None } else { Some(self) }
+            raw::ver_iter_end(self.ptr)
         }
     }
 
-    /// Check if we're at the end of the iteration.
-    /// Not useful/necessary if you're using `next()`,
-    /// but useful for `find_..`.
-    pub fn is_empty(&self) -> bool {
-        // TODO: Can we get this inlined such that all the asserts will be eliminated?
-        unsafe { raw::ver_iter_end(self.ptr) }
+    fn next(&mut self) {
+        unsafe {
+            raw::ver_iter_next(self.ptr)
+        }
     }
 
-    pub fn map<F, B>(self, f: F) -> VerMap<'c, F>
-    where
-        F: FnMut(&VerIterator) -> B,
-    {
-        VerMap { it: self, f }
+    fn as_view(&self) -> Self::View {
+        assert!(!self.is_end());
+
+        VerView {
+            ptr: self.ptr,
+            cache: self.cache,
+        }
     }
-}
 
-#[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
-pub struct VerMap<'c, F> {
-    it: VerIterator<'c>,
-    f: F,
-}
-
-impl<'c, B, F> Iterator for VerMap<'c, F>
-where
-    F: FnMut(&VerIterator) -> B,
-{
-    type Item = B;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.it.next().map(&mut self.f)
+    fn release(&mut self) {
+        unsafe {
+            raw::ver_iter_release(self.ptr)
+        }
     }
 }
 
 /// Actual accessors
-impl<'c> VerIterator<'c> {
+impl<'c> VerView<'c> {
     pub fn version(&self) -> String {
         unsafe {
             make_owned_ascii_string(raw::ver_iter_version(self.ptr))

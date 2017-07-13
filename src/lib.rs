@@ -36,6 +36,7 @@
 extern crate lazy_static;
 extern crate libc;
 
+mod citer;
 mod raw;
 mod sane;
 pub mod simple;
