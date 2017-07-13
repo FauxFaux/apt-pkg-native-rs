@@ -1,3 +1,4 @@
+use std::marker::PhantomData;
 use std::ffi;
 
 use libc;
@@ -160,7 +161,7 @@ impl<'c> PkgIterator<'c> {
 
     pub fn versions(&self) -> VerIterator {
         VerIterator {
-            cache: self.cache,
+            cache: PhantomData,
             first: true,
             ptr: unsafe { raw::pkg_iter_ver_iter(self.ptr) },
         }
@@ -184,7 +185,7 @@ where F: FnMut(&PkgIterator) -> B {
 }
 
 pub struct VerIterator<'c> {
-    cache: &'c Cache,
+    cache: PhantomData<&'c Cache>,
     first: bool,
     ptr: raw::PVerIterator,
 }
