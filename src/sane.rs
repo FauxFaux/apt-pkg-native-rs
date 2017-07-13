@@ -127,18 +127,6 @@ impl<'c> PkgView<'c> {
         unsafe { make_owned_ascii_string(raw::pkg_iter_candidate_version(self.ptr)) }
     }
 
-    pub fn pretty_print(&self) -> String {
-        unsafe {
-            let ptr = raw::pkg_iter_pretty(self.cache.ptr, self.ptr);
-            let result = ffi::CStr::from_ptr(ptr)
-                .to_str()
-                .expect("package names are always low-ascii")
-                .to_string();
-            libc::free(ptr as *mut libc::c_void);
-            result
-        }
-    }
-
     pub fn versions(&self) -> CIterator<VerIterator> {
         CIterator {
             first: true,
@@ -204,10 +192,9 @@ impl<'c> VerView<'c> {
         }
     }
 
-    pub fn section(&self) -> String {
+    pub fn section(&self) -> Option<String> {
         unsafe {
             make_owned_ascii_string(raw::ver_iter_section(self.ptr))
-                .expect("versions always have a section")
         }
     }
 

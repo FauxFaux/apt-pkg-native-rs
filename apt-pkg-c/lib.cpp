@@ -4,7 +4,6 @@
 #include <assert.h>
 
 #include <apt-pkg/pkgcache.h>
-#include <apt-pkg/prettyprinters.h>
 #include <apt-pkg/cachefile.h>
 
 struct PCache {
@@ -51,9 +50,6 @@ extern "C" {
     const char *pkg_iter_arch(PPkgIterator *iterator);
     const char *pkg_iter_current_version(PPkgIterator *iterator);
     const char *pkg_iter_candidate_version(PPkgIterator *iterator);
-
-    // freed by caller
-    char *pkg_iter_pretty(PCache *cache, PPkgIterator *iterator);
 
     PVerIterator *pkg_iter_ver_iter(PPkgIterator *iterator);
     void ver_iter_release(PVerIterator *iterator);
@@ -138,15 +134,11 @@ const char *pkg_iter_current_version(PPkgIterator *wrapper) {
 }
 
 const char *pkg_iter_candidate_version(PPkgIterator *wrapper) {
-    return wrapper->cache->cache_file->GetPolicy()->GetCandidateVer(wrapper->iterator).VerStr();
-}
-
-char *pkg_iter_pretty(PCache *cache, PPkgIterator *wrapper) {
-    assert(cache);
-    assert(wrapper);
-    std::stringstream ss;
-    ss << APT::PrettyPkg(cache->cache_file->GetDepCache(), wrapper->iterator);
-    return strdup(ss.str().c_str());
+    pkgCache::VerIterator it = wrapper->cache->cache_file->GetPolicy()->GetCandidateVer(wrapper->iterator);
+    if (it.end()) {
+        return nullptr;
+    }
+    return it.VerStr();
 }
 
 PVerIterator *pkg_iter_ver_iter(PPkgIterator *wrapper) {

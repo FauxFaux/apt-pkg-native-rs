@@ -41,7 +41,6 @@ extern "C" {
     pub fn pkg_iter_arch(iterator: PPkgIterator) -> *const c_char;
     pub fn pkg_iter_current_version(iterator: PPkgIterator) -> *const c_char;
     pub fn pkg_iter_candidate_version(iterator: PPkgIterator) -> *const c_char;
-    pub fn pkg_iter_pretty(cache: PCache, iterator: PPkgIterator) -> *mut c_char;
 
 
     // Version iterators

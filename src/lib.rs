@@ -49,7 +49,9 @@ mod tests {
     #[test]
     fn pretty_print_all() {
         let mut cache = Cache::get_singleton();
-        assert!(cache.iter().map(|item| item.pretty_print()).count() > 0);
+        let read_all_and_count = cache.iter().map(simple::BinaryPackageVersions::new).count();
+        assert!(read_all_and_count > 2);
+        assert_eq!(read_all_and_count, cache.iter().count());
     }
 
     #[test]
