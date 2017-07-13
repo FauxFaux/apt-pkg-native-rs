@@ -29,6 +29,8 @@ extern "C" {
     void pkg_cache_release(PCache *cache);
 
     PPkgIterator *pkg_cache_pkg_iter(PCache *cache);
+    PPkgIterator *pkg_cache_find_name(PCache *cache, const char *name);
+    PPkgIterator *pkg_cache_find_name_arch(PCache *cache, const char *name, const char *arch);
     void pkg_iter_release(PPkgIterator *iterator);
 
     void pkg_iter_next(PPkgIterator *iterator);
@@ -68,6 +70,20 @@ void pkg_cache_release(PCache *cache) {
 PPkgIterator *pkg_cache_pkg_iter(PCache *cache) {
     PPkgIterator *wrapper = new PPkgIterator();
     wrapper->iterator = cache->cache->PkgBegin();
+    wrapper->cache = cache->cache;
+    return wrapper;
+}
+
+PPkgIterator *pkg_cache_find_name(PCache *cache, const char *name) {
+    PPkgIterator *wrapper = new PPkgIterator();
+    wrapper->iterator = cache->cache->FindPkg(name);
+    wrapper->cache = cache->cache;
+    return wrapper;
+}
+
+PPkgIterator *pkg_cache_find_name_arch(PCache *cache, const char *name, const char *arch) {
+    PPkgIterator *wrapper = new PPkgIterator();
+    wrapper->iterator = cache->cache->FindPkg(name, arch);
     wrapper->cache = cache->cache;
     return wrapper;
 }

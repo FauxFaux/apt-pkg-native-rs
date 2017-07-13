@@ -21,6 +21,8 @@ extern {
     pub fn pkg_cache_release(cache: PCache);
 
     pub fn pkg_cache_pkg_iter(cache: PCache) -> PPkgIterator;
+    pub fn pkg_cache_find_name(cache: PCache, name: *const c_char) -> PPkgIterator;
+    pub fn pkg_cache_find_name_arch(cache: PCache, name: *const c_char, arch: *const c_char) -> PPkgIterator;
     pub fn pkg_iter_release(iterator: PPkgIterator);
 
     pub fn pkg_iter_next(iterator: PPkgIterator);

@@ -36,6 +36,29 @@ impl Cache {
             }
         }
     }
+
+    pub fn find_by_name(&mut self, name: &str) -> PkgIterator {
+        unsafe {
+            let name = ffi::CString::new(name).unwrap();
+            let ptr = raw::pkg_cache_find_name(self.ptr, name.as_ptr());
+            PkgIterator {
+                cache: self,
+                ptr,
+            }
+        }
+    }
+
+    pub fn find_by_name_arch(&mut self, name: &str, arch: &str) -> PkgIterator {
+        unsafe {
+            let name = ffi::CString::new(name).unwrap();
+            let arch = ffi::CString::new(arch).unwrap();
+            let ptr = raw::pkg_cache_find_name_arch(self.ptr, name.as_ptr(), arch.as_ptr());
+            PkgIterator {
+                cache: self,
+                ptr,
+            }
+        }
+    }
 }
 
 
@@ -59,18 +82,28 @@ impl<'c> PkgIterator<'c> {
     pub fn next<'i>(&'i mut self) -> Option<&'i Self> {
         unsafe {
             // we were at the end last time, leave us alone!
-            if raw::pkg_iter_end(self.ptr) {
+            if self.is_empty() {
                 return None;
             }
 
             raw::pkg_iter_next(self.ptr);
 
             // we don't want to observe the end marker
-            if raw::pkg_iter_end(self.ptr) {
+            if self.is_empty() {
                 None
             } else {
                 Some(self)
             }
+        }
+    }
+
+    /// Check if we're at the end of the iteration.
+    /// Not useful/necessary if you're using `next()`,
+    /// but useful for `find_..`.
+    pub fn is_empty(&self) -> bool {
+        // TODO: Can we get this inlined such that all the asserts will be eliminated?
+        unsafe {
+            raw::pkg_iter_end(self.ptr)
         }
     }
 
@@ -96,34 +129,33 @@ impl<'c> PkgIterator<'c> {
     }
 }
 
-unsafe fn make_owned_ascii_string(ptr: *const libc::c_char) -> String {
-    ffi::CStr::from_ptr(ptr)
-        .to_str()
-        .expect("value should always be low-ascii")
-        .to_string()
-}
-
 /// Actual accessors
 impl<'c> PkgIterator<'c> {
     pub fn name(&self) -> String {
+        assert!(!self.is_empty());
         unsafe {
             make_owned_ascii_string(raw::pkg_iter_name(self.ptr))
+                .expect("packages always have names")
         }
     }
 
     pub fn arch(&self) -> String {
+        assert!(!self.is_empty());
         unsafe {
             make_owned_ascii_string(raw::pkg_iter_arch(self.ptr))
+                .expect("packages always have architectures")
         }
     }
 
-    pub fn current_version(&self) -> String {
+    pub fn current_version(&self) -> Option<String> {
+        assert!(!self.is_empty());
         unsafe {
             make_owned_ascii_string(raw::pkg_iter_current_version(self.ptr))
         }
     }
 
     pub fn pretty_print(&self) -> String {
+        assert!(!self.is_empty());
         unsafe {
             let ptr = raw::pkg_iter_pretty(self.cache.ptr, self.ptr);
             let result = ffi::CStr::from_ptr(ptr)
@@ -149,5 +181,18 @@ where F: FnMut(&PkgIterator) -> B {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.it.next().map(&mut self.f)
+    }
+}
+
+
+
+unsafe fn make_owned_ascii_string(ptr: *const libc::c_char) -> Option<String> {
+    if ptr.is_null() {
+        None
+    } else {
+        Some(ffi::CStr::from_ptr(ptr)
+            .to_str()
+            .expect("value should always be low-ascii")
+            .to_string())
     }
 }
