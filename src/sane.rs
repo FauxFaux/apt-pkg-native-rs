@@ -193,9 +193,7 @@ impl<'c> VerView<'c> {
     }
 
     pub fn section(&self) -> Option<String> {
-        unsafe {
-            make_owned_ascii_string(raw::ver_iter_section(self.ptr))
-        }
+        unsafe { make_owned_ascii_string(raw::ver_iter_section(self.ptr)) }
     }
 
     pub fn source_package(&self) -> String {
