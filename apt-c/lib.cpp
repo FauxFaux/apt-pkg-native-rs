@@ -7,22 +7,37 @@
 #include <apt-pkg/cachefile.h>
 
 struct PCache {
+    // Owned by us.
     pkgCacheFile *cache_file;
+
+    // Borrowed from cache_file.
+    pkgCache *cache;
+};
+
+struct PPkgIterator {
+    // Owned by us.
+    pkgCache::PkgIterator iterator;
+
+    // Borrowed from PCache.
     pkgCache *cache;
 };
 
 extern "C" {
-    PCache *get_pkg_cache();
-    void free_pkg_cache(PCache *cache);
+    PCache *pkg_cache_create();
+    void pkg_cache_release(PCache *cache);
 
-    int iterate_packages(PCache *cache, int (*visit)(pkgCache::PkgIterator *iterator));
-    const char *pkg_iter_name(pkgCache::PkgIterator *iterator);
+    PPkgIterator *pkg_cache_pkg_iter(PCache *cache);
+    void pkg_iter_release(PPkgIterator *iterator);
+
+    bool pkg_iter_next(PPkgIterator *iterator);
+
+    const char *pkg_iter_name(PPkgIterator *iterator);
 
     // freed by caller
-    char *pkg_iter_pretty(PCache *cache, pkgCache::PkgIterator *iterator);
+    char *pkg_iter_pretty(PCache *cache, PPkgIterator *iterator);
 }
 
-PCache *get_pkg_cache() {
+PCache *pkg_cache_create() {
     pkgInitConfig(*_config);
     pkgInitSystem(*_config, _system);
 
@@ -36,31 +51,37 @@ PCache *get_pkg_cache() {
     return ret;
 }
 
-void free_pkg_cache(PCache *cache) {
+void pkg_cache_release(PCache *cache) {
     // TODO: is cache->cache cleaned up with cache->cache_file?
     delete cache->cache_file;
     delete cache;
 }
 
-int iterate_packages(PCache *cache, int (*visit)(pkgCache::PkgIterator*)) {
-    for (pkgCache::PkgIterator iter = cache->cache->PkgBegin(); iter != cache->cache->PkgEnd(); ++iter) {
-        if (!visit(&iter)) {
-            return false;
-        }
-    }
-
-    return true;
+PPkgIterator *pkg_cache_pkg_iter(PCache *cache) {
+    PPkgIterator *wrapper = new PPkgIterator();
+    wrapper->iterator = cache->cache->PkgBegin();
+    wrapper->cache = cache->cache;
+    return wrapper;
 }
 
-const char *pkg_iter_name(pkgCache::PkgIterator *iterator) {
-    return iterator->Name();
+void pkg_iter_release(PPkgIterator *wrapper) {
+    delete wrapper;
 }
 
-char *pkg_iter_pretty(PCache *cache, pkgCache::PkgIterator *iterator) {
+bool pkg_iter_next(PPkgIterator *wrapper) {
+    ++wrapper->iterator;
+    return wrapper->cache->PkgEnd() != wrapper->iterator;
+}
+
+const char *pkg_iter_name(PPkgIterator *wrapper) {
+    return wrapper->iterator.Name();
+}
+
+char *pkg_iter_pretty(PCache *cache, PPkgIterator *wrapper) {
     assert(cache);
-    assert(iterator);
+    assert(wrapper);
     std::stringstream ss;
-    ss << APT::PrettyPkg(cache->cache_file->GetDepCache(), *iterator);
+    ss << APT::PrettyPkg(cache->cache_file->GetDepCache(), wrapper->iterator);
     return strdup(ss.str().c_str());
 }
 

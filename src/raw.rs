@@ -1,19 +1,26 @@
+/// In general:
+///  * *mut c_void are to be released by the appropriate function
+///  * *const c_chars are short-term borrows
+///  * *mut c_chars are to be freed by libc::free.
+
 use libc::c_void;
 use libc::c_char;
-use libc::c_int;
+
+type PCache = *mut c_void;
+type PPkgIterator = *mut c_void;
 
 #[link(name = "apt-c")]
 #[link(name = "apt-pkg")]
 #[link(name = "stdc++")]
 extern {
-    pub fn get_pkg_cache() -> *mut c_void;
-    pub fn free_pkg_cache(cache: *mut c_void);
+    pub fn pkg_cache_create() -> PCache;
+    pub fn pkg_cache_release(cache: PCache);
 
-    pub fn iterate_packages(
-        cache: *mut c_void,
-        visit: extern fn(name: *mut c_void) -> c_int,
-    ) -> c_int;
+    pub fn pkg_cache_pkg_iter(cache: PCache) -> PPkgIterator;
+    pub fn pkg_iter_release(iterator: PPkgIterator);
 
-    pub fn pkg_iter_name(iterator: *mut c_void) -> *const c_char;
-    pub fn pkg_iter_pretty(cache: *mut c_void, iterator: *mut c_void) -> *mut c_char;
+    pub fn pkg_iter_next(iterator: PPkgIterator) -> bool;
+
+    pub fn pkg_iter_name(iterator: PPkgIterator) -> *const c_char;
+    pub fn pkg_iter_pretty(cache: PCache, iterator: PPkgIterator) -> *mut c_char;
 }
