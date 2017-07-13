@@ -80,6 +80,19 @@ where
     {
         CMap { it: self, f }
     }
+
+    pub fn count(mut self) -> usize {
+        // Not sure this is actually better than self.map(|_| ()).count()
+
+        let mut count = 0;
+
+        while !self.raw.is_end() {
+            self.raw.next();
+            count += 1;
+        }
+
+        count
+    }
 }
 
 #[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
