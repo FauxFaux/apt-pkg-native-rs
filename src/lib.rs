@@ -56,17 +56,27 @@ mod tests {
     #[test]
     fn find_a_package() {
         let mut cache = Cache::get_singleton();
-        {
-            let iter = cache.find_by_name("apt");
-            assert!(!iter.is_empty());
-            assert_eq!("apt", iter.name());
+
+        if let Some(view) = cache.find_by_name("apt").next() {
+            assert_eq!("apt", view.name());
+        } else {
+            panic!("not found!");
         }
 
-        {
-            let iter = cache.find_by_name(
-                "this-package-doesnt-exist-and-if-someone-makes-it-ill-be-really-angry",
-            );
-            assert!(iter.is_empty());
-        }
+        assert!(cache.find_by_name(
+            "this-package-doesnt-exist-and-if-someone-makes-it-ill-be-really-angry",
+        ).next().is_none());
+
+    }
+
+    // TODO: this should not even remotely compile
+    #[test]
+    fn demonstrate_insane_iterator_behaviour() {
+        let mut cache = Cache::get_singleton();
+        let mut it = cache.iter();
+        let first = it.next().unwrap();
+        let second = it.next().unwrap();
+        assert_eq!(first.arch(), second.arch());
+        assert_eq!(first.name(), second.name());
     }
 }
