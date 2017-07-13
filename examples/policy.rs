@@ -16,16 +16,19 @@ fn main() {
 
     if let Some(view) = found.next() {
         println!("{}:{}:", view.name(), view.arch());
-        let installed_version = view.current_version().unwrap_or("(none)".to_string());
+
+        let installed_version = view.current_version().unwrap_or_else(|| "(none)".to_string());
         println!("  Installed: {}", installed_version);
-        println!("  Candidate: {}", view.candidate_version().unwrap_or("(none)".to_string()));
+        println!("  Candidate: {}", view.candidate_version().unwrap_or_else(|| "(none)".to_string()));
+
         println!("  Version table:");
-        for version in view.versions().map(simple::Version::from_iter) {
+        for version in view.versions().map(simple::Version::new) {
             println!(" {} {} {}",
                      if version.version == installed_version { "***" } else { "   " },
                      version.version,
                      version.priority,
             );
+
             println!("        TODO: urls");
         }
     } else {

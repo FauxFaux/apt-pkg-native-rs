@@ -73,7 +73,7 @@ impl<'c> Drop for PkgIterator<'c> {
 /// Iterator-like interface.
 /// Can't implement Iterator due to the mutation / lifetime constraints?
 impl<'c> PkgIterator<'c> {
-    pub fn next<'i>(&'i mut self) -> Option<&'i Self> {
+    pub fn next(&mut self) -> Option<&Self> {
         unsafe {
             // we were at the end last time, leave us alone!
             if self.is_empty() {
@@ -155,7 +155,7 @@ impl<'c> PkgIterator<'c> {
                 .expect("package names are always low-ascii")
                 .to_string();
             libc::free(ptr as *mut libc::c_void);
-            return result;
+            result
         }
     }
 
@@ -199,7 +199,7 @@ impl<'c> Drop for VerIterator<'c> {
 }
 
 impl<'c> VerIterator<'c> {
-    pub fn next<'i>(&'i mut self) -> Option<&'i Self> {
+    pub fn next(&mut self) -> Option<&Self> {
         unsafe {
             // we were at the end last time, leave us alone!
             if self.is_empty() {

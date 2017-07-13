@@ -2,12 +2,12 @@ use sane;
 
 #[derive(Clone, Debug)]
 pub struct BinaryPackage {
-    name: String,
-    arch: String,
+    pub name: String,
+    pub arch: String,
 }
 
 impl BinaryPackage {
-    pub fn from_iter(iter: &sane::PkgIterator) -> Self {
+    pub fn new(iter: &sane::PkgIterator) -> Self {
         BinaryPackage {
             name: iter.name(),
             arch: iter.arch(),
@@ -27,7 +27,7 @@ pub struct Version {
 
 
 impl Version {
-    pub fn from_iter(iter: &sane::VerIterator) -> Self {
+    pub fn new(iter: &sane::VerIterator) -> Self {
         Version {
             version: iter.version(),
             arch: iter.arch(),

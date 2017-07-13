@@ -1,7 +1,7 @@
 /// In general:
-///  * *mut c_void are to be released by the appropriate function
-///  * *const c_chars are short-term borrows
-///  * *mut c_chars are to be freed by libc::free.
+///  * `*mut c_void` are to be released by the appropriate function
+///  * `*const c_chars` are short-term borrows
+///  * `*mut c_chars` are to be freed by `libc::free`.
 
 use libc::c_void;
 use libc::c_char;
