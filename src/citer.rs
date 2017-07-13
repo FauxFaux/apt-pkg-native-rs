@@ -10,20 +10,26 @@ pub trait RawIterator {
 }
 
 pub struct CIterator<R>
-where R: RawIterator {
+where
+    R: RawIterator,
+{
     pub first: bool,
     pub raw: R,
 }
 
 impl<R> Drop for CIterator<R>
-where R: RawIterator {
+where
+    R: RawIterator,
+{
     fn drop(&mut self) {
         self.raw.release();
     }
 }
 
 impl<R> CIterator<R>
-where R: RawIterator {
+where
+    R: RawIterator,
+{
     pub fn next(&mut self) -> Option<R::View> {
         if self.raw.is_end() {
             return None;
@@ -36,7 +42,11 @@ where R: RawIterator {
         self.first = false;
 
         // we don't want to observe the end marker
-        if self.raw.is_end() { None } else { Some(self.raw.as_view()) }
+        if self.raw.is_end() {
+            None
+        } else {
+            Some(self.raw.as_view())
+        }
     }
 
     pub fn map<F, B>(self, f: F) -> CMap<R, F>
@@ -49,7 +59,9 @@ where R: RawIterator {
 
 #[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
 pub struct CMap<R, F>
-where R: RawIterator {
+where
+    R: RawIterator,
+{
     it: CIterator<R>,
     f: F,
 }

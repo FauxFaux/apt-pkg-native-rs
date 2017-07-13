@@ -26,12 +26,7 @@ impl Cache {
     ///
     /// See the module documentation for apologies about how this isn't an iterator.
     pub fn iter(&mut self) -> CIterator<PkgIterator> {
-        unsafe {
-            PkgIterator::new(
-                self,
-                raw::pkg_cache_pkg_iter(self.ptr),
-            )
-        }
+        unsafe { PkgIterator::new(self, raw::pkg_cache_pkg_iter(self.ptr)) }
     }
 
     /// Find a package by name. It's not clear whether this picks a random arch,
@@ -42,10 +37,7 @@ impl Cache {
         unsafe {
             let name = ffi::CString::new(name).unwrap();
             let ptr = raw::pkg_cache_find_name(self.ptr, name.as_ptr());
-            PkgIterator::new(
-                self,
-                ptr,
-            )
+            PkgIterator::new(self, ptr)
         }
     }
 
@@ -57,10 +49,7 @@ impl Cache {
             let name = ffi::CString::new(name).unwrap();
             let arch = ffi::CString::new(arch).unwrap();
             let ptr = raw::pkg_cache_find_name_arch(self.ptr, name.as_ptr(), arch.as_ptr());
-            PkgIterator::new(
-                self,
-                ptr,
-            )
+            PkgIterator::new(self, ptr)
         }
     }
 }
@@ -76,10 +65,7 @@ impl<'c> PkgIterator<'c> {
     fn new(cache: &'c Cache, ptr: raw::PCache) -> citer::CIterator<Self> {
         citer::CIterator {
             first: true,
-            raw: PkgIterator{
-                cache,
-                ptr
-            }
+            raw: PkgIterator { cache, ptr },
         }
     }
 }
@@ -95,15 +81,11 @@ impl<'c> citer::RawIterator for PkgIterator<'c> {
     type View = PkgView<'c>;
 
     fn is_end(&self) -> bool {
-        unsafe {
-            raw::pkg_iter_end(self.ptr)
-        }
+        unsafe { raw::pkg_iter_end(self.ptr) }
     }
 
     fn next(&mut self) {
-        unsafe {
-            raw::pkg_iter_next(self.ptr)
-        }
+        unsafe { raw::pkg_iter_next(self.ptr) }
     }
 
     fn as_view(&self) -> Self::View {
@@ -116,9 +98,7 @@ impl<'c> citer::RawIterator for PkgIterator<'c> {
     }
 
     fn release(&mut self) {
-        unsafe {
-            raw::pkg_iter_release(self.ptr)
-        }
+        unsafe { raw::pkg_iter_release(self.ptr) }
     }
 }
 
@@ -165,7 +145,7 @@ impl<'c> PkgView<'c> {
             raw: VerIterator {
                 cache: PhantomData,
                 ptr: unsafe { raw::pkg_iter_ver_iter(self.ptr) },
-            }
+            },
         }
     }
 }
@@ -187,15 +167,11 @@ impl<'c> citer::RawIterator for VerIterator<'c> {
     type View = VerView<'c>;
 
     fn is_end(&self) -> bool {
-        unsafe {
-            raw::ver_iter_end(self.ptr)
-        }
+        unsafe { raw::ver_iter_end(self.ptr) }
     }
 
     fn next(&mut self) {
-        unsafe {
-            raw::ver_iter_next(self.ptr)
-        }
+        unsafe { raw::ver_iter_next(self.ptr) }
     }
 
     fn as_view(&self) -> Self::View {
@@ -208,9 +184,7 @@ impl<'c> citer::RawIterator for VerIterator<'c> {
     }
 
     fn release(&mut self) {
-        unsafe {
-            raw::ver_iter_release(self.ptr)
-        }
+        unsafe { raw::ver_iter_release(self.ptr) }
     }
 }
 
