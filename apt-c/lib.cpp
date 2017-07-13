@@ -35,9 +35,12 @@ extern "C" {
     bool pkg_iter_end(PPkgIterator *iterator);
 
     const char *pkg_iter_name(PPkgIterator *iterator);
+    const char *pkg_iter_arch(PPkgIterator *iterator);
+    const char *pkg_iter_current_version(PPkgIterator *iterator);
 
     // freed by caller
     char *pkg_iter_pretty(PCache *cache, PPkgIterator *iterator);
+
 }
 
 void init_config_system() {
@@ -85,6 +88,14 @@ const char *pkg_iter_name(PPkgIterator *wrapper) {
     return wrapper->iterator.Name();
 }
 
+const char *pkg_iter_arch(PPkgIterator *wrapper) {
+    return wrapper->iterator.Arch();
+}
+
+const char *pkg_iter_current_version(PPkgIterator *wrapper) {
+    return wrapper->iterator.CurVersion();
+}
+
 char *pkg_iter_pretty(PCache *cache, PPkgIterator *wrapper) {
     assert(cache);
     assert(wrapper);
@@ -93,6 +104,3 @@ char *pkg_iter_pretty(PCache *cache, PPkgIterator *wrapper) {
     return strdup(ss.str().c_str());
 }
 
-//const void *pkg_iter_name(pkgCache::PkgIterator *iterator) {
-//    return iterator->VersionList();
-//}

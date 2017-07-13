@@ -4,6 +4,7 @@ use libc;
 use raw;
 
 // Probably not cloneable / copyable.
+/// You might only be able to create one of these per process.
 #[derive(Debug)]
 pub struct Cache {
     ptr: raw::PCache
@@ -86,7 +87,8 @@ impl<'c> PkgIterator<'c> {
         count
     }
 
-    pub fn map<F>(self, f: F) -> PkgMap<'c, F> {
+    pub fn map<F, B>(self, f: F) -> PkgMap<'c, F>
+    where F: FnMut(&PkgIterator) -> B {
         PkgMap {
             it: self,
             f,
@@ -94,12 +96,31 @@ impl<'c> PkgIterator<'c> {
     }
 }
 
+unsafe fn make_owned_ascii_string(ptr: *const libc::c_char) -> String {
+    ffi::CStr::from_ptr(ptr)
+        .to_str()
+        .expect("value should always be low-ascii")
+        .to_string()
+}
+
 /// Actual accessors
 impl<'c> PkgIterator<'c> {
     pub fn name(&self) -> String {
         unsafe {
-            ffi::CStr::from_ptr(raw::pkg_iter_name(self.ptr))
-        }.to_str().expect("package names are always low-ascii").to_string()
+            make_owned_ascii_string(raw::pkg_iter_name(self.ptr))
+        }
+    }
+
+    pub fn arch(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::pkg_iter_arch(self.ptr))
+        }
+    }
+
+    pub fn current_version(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::pkg_iter_current_version(self.ptr))
+        }
     }
 
     pub fn pretty_print(&self) -> String {

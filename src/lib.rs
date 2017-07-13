@@ -1,7 +1,10 @@
 extern crate libc;
 
-pub mod raw;
-pub mod sane;
+mod raw;
+mod sane;
+mod simple;
+
+pub use sane::Cache;
 
 #[cfg(test)]
 mod tests {
@@ -9,8 +12,8 @@ mod tests {
 
     #[test]
     fn list_all() {
-        let mut cache = sane::Cache::new();
-        for name in cache.iter().map(|item: &sane::PkgIterator| item.pretty_print()) {
+        let mut cache = Cache::new();
+        for name in cache.iter().map(|item| item.pretty_print()) {
             println!("{}", name);
         }
     }
