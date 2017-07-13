@@ -96,19 +96,6 @@ impl<'c> PkgIterator<'c> {
         }
     }
 
-    pub fn count(mut self) -> usize {
-        let mut count = 0;
-        loop {
-            if self.next().is_none() {
-                break;
-            }
-
-            count += 1;
-        }
-
-        count
-    }
-
     pub fn map<F, B>(self, f: F) -> PkgMap<'c, F>
     where F: FnMut(&PkgIterator) -> B {
         PkgMap {
@@ -155,6 +142,13 @@ impl<'c> PkgIterator<'c> {
             return result;
         }
     }
+
+    pub fn versions(&self) -> VerIterator {
+        VerIterator {
+            cache: self.cache,
+            ptr: unsafe { raw::pkg_iter_ver_iter(self.ptr) },
+        }
+    }
 }
 
 #[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
@@ -173,7 +167,109 @@ where F: FnMut(&PkgIterator) -> B {
     }
 }
 
+pub struct VerIterator<'c> {
+    cache: &'c Cache,
+    ptr: raw::PVerIterator,
+}
 
+impl<'c> Drop for VerIterator<'c> {
+    fn drop(&mut self) {
+        unsafe {
+            raw::ver_iter_release(self.ptr)
+        }
+    }
+}
+
+impl<'c> VerIterator<'c> {
+    pub fn next<'i>(&'i mut self) -> Option<&'i Self> {
+        unsafe {
+            // we were at the end last time, leave us alone!
+            if self.is_empty() {
+                return None;
+            }
+
+            raw::ver_iter_next(self.ptr);
+
+            // we don't want to observe the end marker
+            if self.is_empty() {
+                None
+            } else {
+                Some(self)
+            }
+        }
+    }
+
+    /// Check if we're at the end of the iteration.
+    /// Not useful/necessary if you're using `next()`,
+    /// but useful for `find_..`.
+    pub fn is_empty(&self) -> bool {
+        // TODO: Can we get this inlined such that all the asserts will be eliminated?
+        unsafe {
+            raw::ver_iter_end(self.ptr)
+        }
+    }
+
+    pub fn map<F, B>(self, f: F) -> VerMap<'c, F>
+    where F: FnMut(&VerIterator) -> B {
+        VerMap {
+            it: self,
+            f,
+        }
+    }
+}
+
+#[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
+pub struct VerMap<'c, F> {
+    it: VerIterator<'c>,
+    f: F,
+}
+
+impl<'c, B, F> Iterator for VerMap<'c, F>
+where F: FnMut(&VerIterator) -> B {
+
+    type Item = B;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.it.next().map(&mut self.f)
+    }
+}
+
+impl<'c> VerIterator<'c> {
+    pub fn version(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::ver_iter_version(self.ptr))
+                .expect("versions always have a version")
+        }
+    }
+
+    pub fn arch(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::ver_iter_arch(self.ptr))
+                .expect("versions always have an arch")
+        }
+    }
+
+    pub fn section(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::ver_iter_section(self.ptr))
+                .expect("versions always have a section")
+        }
+    }
+
+    pub fn source_package(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::ver_iter_source_package(self.ptr))
+                .expect("versions always have a source package")
+        }
+    }
+
+    pub fn source_version(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::ver_iter_source_version(self.ptr))
+                .expect("versions always have a source_version")
+        }
+    }
+}
 
 unsafe fn make_owned_ascii_string(ptr: *const libc::c_char) -> Option<String> {
     if ptr.is_null() {

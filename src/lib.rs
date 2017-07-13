@@ -3,7 +3,7 @@ extern crate libc;
 
 mod raw;
 mod sane;
-mod simple;
+pub mod simple;
 
 pub use sane::Cache;
 
