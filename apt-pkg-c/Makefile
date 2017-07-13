@@ -1,11 +1,11 @@
 CXXFLAGS=-Wall -Wextra -g
 
-all: libapt-c.a
+all: libapt-pkg-c.a
 
 lib.o: lib.cpp lib.h
 
-libapt-c.a: lib.o
+libapt-pkg-c.a: lib.o
 	ar rcs $@ $<
 
 clean:
-	$(RM) libapt-c.a lib.o
+	$(RM) libapt-pkg-c.a lib.o

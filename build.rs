@@ -1,3 +1,3 @@
 fn main() {
-    println!("cargo:rustc-link-search=apt-c")
+    println!("cargo:rustc-link-search=apt-pkg-c")
 }
