@@ -62,10 +62,11 @@ impl Version {
 
 impl fmt::Display for Version {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}:{} in {:?} from {}:{} at {}",
-            self.version,
-            self.arch,
-            self.section,
+        write!(f, "{}:{}", self.version, self.arch)?;
+        if let Some(ref section) = self.section {
+            write!(f, " in {}", section)?;
+        }
+        write!(f, " from {}:{} at {}",
             self.source_package,
             self.source_version,
             self.priority,
