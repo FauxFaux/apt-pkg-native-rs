@@ -1,4 +1,4 @@
-CXXFLAGS=-Wall -Wextra
+CXXFLAGS=-Wall -Wextra -g
 
 all: libapt-c.a
 
