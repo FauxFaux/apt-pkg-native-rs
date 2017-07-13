@@ -15,10 +15,7 @@ pub type PPkgIterator = *mut c_void;
 extern {
     /// Must be called exactly once, before anything else?
     fn init_config_system();
-
-    /// I'm not convinced you can even call this multiple times.
-    pub fn pkg_cache_create() -> PCache;
-    pub fn pkg_cache_release(cache: PCache);
+    fn pkg_cache_create() -> PCache;
 
     pub fn pkg_cache_pkg_iter(cache: PCache) -> PPkgIterator;
     pub fn pkg_cache_find_name(cache: PCache, name: *const c_char) -> PPkgIterator;
@@ -34,14 +31,23 @@ extern {
     pub fn pkg_iter_pretty(cache: PCache, iterator: PPkgIterator) -> *mut c_char;
 }
 
-static mut INIT_CONFIG_CALLED: bool = false;
+pub fn pkg_cache_get() -> PCache {
+    CACHE.ptr
+}
 
-pub unsafe fn init_config_system_once() {
-    if INIT_CONFIG_CALLED {
-        return;
-    }
+struct CacheHolder {
+    ptr: PCache
+}
 
-    INIT_CONFIG_CALLED = true;
+unsafe impl Sync for CacheHolder {}
 
-    init_config_system()
+lazy_static! {
+    static ref CACHE: CacheHolder = {
+        unsafe {
+            init_config_system();
+            CacheHolder {
+                ptr: pkg_cache_create()
+            }
+        }
+    };
 }

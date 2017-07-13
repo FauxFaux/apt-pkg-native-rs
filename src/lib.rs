@@ -1,3 +1,4 @@
+#[macro_use] extern crate lazy_static;
 extern crate libc;
 
 mod raw;
@@ -10,17 +11,15 @@ pub use sane::Cache;
 mod tests {
     use super::*;
 
-//    #[test]
-    fn list_all() {
-        let mut cache = Cache::new();
-        for name in cache.iter().map(|item| item.pretty_print()) {
-            println!("{}", name);
-        }
+    #[test]
+    fn pretty_print_all() {
+        let mut cache = Cache::get_singleton();
+        assert!(cache.iter().map(|item| item.pretty_print()).count() > 0);
     }
 
     #[test]
     fn find_a_package() {
-        let mut cache = Cache::new();
+        let mut cache = Cache::get_singleton();
         {
             let iter = cache.find_by_name("apt");
             assert!(!iter.is_empty());

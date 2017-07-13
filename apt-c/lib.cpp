@@ -26,7 +26,6 @@ extern "C" {
     void init_config_system();
 
     PCache *pkg_cache_create();
-    void pkg_cache_release(PCache *cache);
 
     PPkgIterator *pkg_cache_pkg_iter(PCache *cache);
     PPkgIterator *pkg_cache_find_name(PCache *cache, const char *name);
@@ -88,6 +87,7 @@ PPkgIterator *pkg_cache_find_name_arch(PCache *cache, const char *name, const ch
     return wrapper;
 }
 
+// TODO: we don't expose this so we always leak the wrapper.
 void pkg_iter_release(PPkgIterator *wrapper) {
     delete wrapper;
 }

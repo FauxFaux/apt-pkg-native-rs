@@ -3,28 +3,17 @@ use std::ffi;
 use libc;
 use raw;
 
-// Probably not cloneable / copyable.
-/// You might only be able to create one of these per process.
+/// A reference to the package cache singleton.
+/// Basically just a collection of related methods.
 #[derive(Debug)]
 pub struct Cache {
     ptr: raw::PCache
 }
 
-impl Drop for Cache {
-    fn drop(&mut self) {
-        unsafe {
-            raw::pkg_cache_release(self.ptr)
-        }
-    }
-}
-
 impl Cache {
-    pub fn new() -> Cache {
-        unsafe {
-            raw::init_config_system_once();
-            Cache {
-                ptr: raw::pkg_cache_create()
-            }
+    pub fn get_singleton() -> Cache {
+        Cache {
+            ptr: raw::pkg_cache_get()
         }
     }
 
