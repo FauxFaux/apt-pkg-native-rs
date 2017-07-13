@@ -4,18 +4,24 @@ use std::ffi;
 use libc;
 use raw;
 
-/// A reference to the package cache singleton.
-/// Basically just a collection of related methods.
+/// A reference to the package cache singleton,
+/// from which most functionality can be accessed.
 #[derive(Debug)]
 pub struct Cache {
     ptr: raw::PCache,
 }
 
 impl Cache {
+    /// Get a reference to the singleton.
     pub fn get_singleton() -> Cache {
         Cache { ptr: raw::pkg_cache_get() }
     }
 
+    /// Walk through all of the packages, in a random order.
+    ///
+    /// If there are multiple architectures, multiple architectures will be returned.
+    ///
+    /// See the module documentation for apologies about how this isn't an iterator.
     pub fn iter(&mut self) -> PkgIterator {
         unsafe {
             PkgIterator {
@@ -26,6 +32,10 @@ impl Cache {
         }
     }
 
+    /// Find a package by name. It's not clear whether this picks a random arch,
+    /// or the primary one.
+    ///
+    /// The returned iterator will either be at the end, or at a package with the name.
     pub fn find_by_name(&mut self, name: &str) -> PkgIterator {
         unsafe {
             let name = ffi::CString::new(name).unwrap();
@@ -38,6 +48,9 @@ impl Cache {
         }
     }
 
+    /// Find a package by name and architecture.
+    ///
+    /// The returned iterator will either be at the end, or at a matching package.
     pub fn find_by_name_arch(&mut self, name: &str, arch: &str) -> PkgIterator {
         unsafe {
             let name = ffi::CString::new(name).unwrap();
@@ -52,7 +65,7 @@ impl Cache {
     }
 }
 
-
+/// An "iterator"/pointer to a point in a package list.
 #[derive(Debug)]
 pub struct PkgIterator<'c> {
     cache: &'c Cache,
@@ -66,8 +79,7 @@ impl<'c> Drop for PkgIterator<'c> {
     }
 }
 
-/// Iterator-like interface.
-/// Can't implement Iterator due to the mutation / lifetime constraints?
+/// Iterator-like interface
 impl<'c> PkgIterator<'c> {
     pub fn next(&mut self) -> Option<&Self> {
         unsafe {
@@ -170,6 +182,7 @@ where
     }
 }
 
+/// An "iterator"/pointer to a point in a version list.
 pub struct VerIterator<'c> {
     cache: PhantomData<&'c Cache>,
     first: bool,
@@ -182,6 +195,7 @@ impl<'c> Drop for VerIterator<'c> {
     }
 }
 
+/// Iterator-like interface
 impl<'c> VerIterator<'c> {
     pub fn next(&mut self) -> Option<&Self> {
         unsafe {
@@ -234,6 +248,7 @@ where
     }
 }
 
+/// Actual accessors
 impl<'c> VerIterator<'c> {
     pub fn version(&self) -> String {
         unsafe {

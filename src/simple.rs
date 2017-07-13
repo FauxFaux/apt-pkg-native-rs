@@ -1,3 +1,5 @@
+//! Some structs representing basic concepts, and utilities to copy out of "iterators".
+
 use sane;
 
 #[derive(Clone, Debug)]

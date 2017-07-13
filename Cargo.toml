@@ -3,9 +3,18 @@ name = "apt-pkg-native"
 version = "0.1.0"
 authors = ["Chris West (Faux) <git@goeswhere.com>"]
 
+description = "Bindings for libapt-pkg"
+repository = "https://github.com/FauxFaux/apt-pkg-native-rs"
+readme = "README.md"
+categories = ["api-bindings", "os"]
+license = "MIT"
+
 [dependencies]
 lazy_static = "0.2.8"
 libc = "0.2.26"
 
 [build-dependencies]
 gcc = "0.3.51"
+
+[badges]
+travis-ci = { repository = "FauxFaux/apt-pkg-native-rs" }
