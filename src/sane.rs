@@ -19,8 +19,11 @@ impl Drop for Cache {
 
 impl Cache {
     pub fn new() -> Cache {
-        Cache {
-            ptr: unsafe { raw::pkg_cache_create() }
+        unsafe {
+            raw::init_config_system_once();
+            Cache {
+                ptr: raw::pkg_cache_create()
+            }
         }
     }
 

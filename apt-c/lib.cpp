@@ -23,6 +23,8 @@ struct PPkgIterator {
 };
 
 extern "C" {
+    void init_config_system();
+
     PCache *pkg_cache_create();
     void pkg_cache_release(PCache *cache);
 
@@ -38,10 +40,12 @@ extern "C" {
     char *pkg_iter_pretty(PCache *cache, PPkgIterator *iterator);
 }
 
-PCache *pkg_cache_create() {
+void init_config_system() {
     pkgInitConfig(*_config);
     pkgInitSystem(*_config, _system);
+}
 
+PCache *pkg_cache_create() {
     pkgCacheFile *cache_file = new pkgCacheFile();
     pkgCache *cache = cache_file->GetPkgCache();
 

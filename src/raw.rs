@@ -13,6 +13,10 @@ pub type PPkgIterator = *mut c_void;
 #[link(name = "apt-pkg")]
 #[link(name = "stdc++")]
 extern {
+    /// Must be called exactly once, before anything else?
+    fn init_config_system();
+
+    /// I'm not convinced you can even call this multiple times.
     pub fn pkg_cache_create() -> PCache;
     pub fn pkg_cache_release(cache: PCache);
 
@@ -24,4 +28,16 @@ extern {
 
     pub fn pkg_iter_name(iterator: PPkgIterator) -> *const c_char;
     pub fn pkg_iter_pretty(cache: PCache, iterator: PPkgIterator) -> *mut c_char;
+}
+
+static mut INIT_CONFIG_CALLED: bool = false;
+
+pub unsafe fn init_config_system_once() {
+    if INIT_CONFIG_CALLED {
+        return;
+    }
+
+    INIT_CONFIG_CALLED = true;
+
+    init_config_system()
 }
