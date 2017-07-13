@@ -37,6 +37,7 @@ extern {
     pub fn pkg_iter_name(iterator: PPkgIterator) -> *const c_char;
     pub fn pkg_iter_arch(iterator: PPkgIterator) -> *const c_char;
     pub fn pkg_iter_current_version(iterator: PPkgIterator) -> *const c_char;
+    pub fn pkg_iter_candidate_version(iterator: PPkgIterator) -> *const c_char;
     pub fn pkg_iter_pretty(cache: PCache, iterator: PPkgIterator) -> *mut c_char;
 
 
@@ -57,6 +58,7 @@ extern {
     pub fn ver_iter_source_package(iterator: PVerIterator) -> *mut c_char;
     pub fn ver_iter_source_version(iterator: PVerIterator) -> *mut c_char;
     pub fn ver_iter_arch(iterator: PVerIterator) -> *mut c_char;
+    pub fn ver_iter_priority(iterator: PVerIterator) -> i32;
 }
 
 pub fn pkg_cache_get() -> PCache {

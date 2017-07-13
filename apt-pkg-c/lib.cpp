@@ -1,4 +1,5 @@
 #include <sstream>
+#include <cstdint>
 
 #include <assert.h>
 
@@ -18,8 +19,8 @@ struct PPkgIterator {
     // Owned by us.
     pkgCache::PkgIterator iterator;
 
-    // Borrowed from PCache.
-    pkgCache *cache;
+    // Borrow of "static" PCache.
+    PCache *cache;
 };
 
 struct PVerIterator {
@@ -28,6 +29,9 @@ struct PVerIterator {
 
     // Borrowed from PCache.
     pkgCache::PkgIterator *pkg;
+
+    // Borrow of "static" PCache.
+    PCache *cache;
 };
 
 extern "C" {
@@ -46,6 +50,7 @@ extern "C" {
     const char *pkg_iter_name(PPkgIterator *iterator);
     const char *pkg_iter_arch(PPkgIterator *iterator);
     const char *pkg_iter_current_version(PPkgIterator *iterator);
+    const char *pkg_iter_candidate_version(PPkgIterator *iterator);
 
     // freed by caller
     char *pkg_iter_pretty(PCache *cache, PPkgIterator *iterator);
@@ -61,6 +66,7 @@ extern "C" {
     const char *ver_iter_source_package(PVerIterator *iterator);
     const char *ver_iter_source_version(PVerIterator *iterator);
     const char *ver_iter_arch(PVerIterator *iterator);
+    int32_t ver_iter_priority(PVerIterator *iterator);
 }
 
 void init_config_system() {
@@ -89,21 +95,21 @@ void pkg_cache_release(PCache *cache) {
 PPkgIterator *pkg_cache_pkg_iter(PCache *cache) {
     PPkgIterator *wrapper = new PPkgIterator();
     wrapper->iterator = cache->cache->PkgBegin();
-    wrapper->cache = cache->cache;
+    wrapper->cache = cache;
     return wrapper;
 }
 
 PPkgIterator *pkg_cache_find_name(PCache *cache, const char *name) {
     PPkgIterator *wrapper = new PPkgIterator();
     wrapper->iterator = cache->cache->FindPkg(name);
-    wrapper->cache = cache->cache;
+    wrapper->cache = cache;
     return wrapper;
 }
 
 PPkgIterator *pkg_cache_find_name_arch(PCache *cache, const char *name, const char *arch) {
     PPkgIterator *wrapper = new PPkgIterator();
     wrapper->iterator = cache->cache->FindPkg(name, arch);
-    wrapper->cache = cache->cache;
+    wrapper->cache = cache;
     return wrapper;
 }
 
@@ -116,7 +122,7 @@ void pkg_iter_next(PPkgIterator *wrapper) {
 }
 
 bool pkg_iter_end(PPkgIterator *wrapper) {
-    return wrapper->cache->PkgEnd() == wrapper->iterator;
+    return wrapper->cache->cache->PkgEnd() == wrapper->iterator;
 }
 
 const char *pkg_iter_name(PPkgIterator *wrapper) {
@@ -131,6 +137,10 @@ const char *pkg_iter_current_version(PPkgIterator *wrapper) {
     return wrapper->iterator.CurVersion();
 }
 
+const char *pkg_iter_candidate_version(PPkgIterator *wrapper) {
+    return wrapper->cache->cache_file->GetPolicy()->GetCandidateVer(wrapper->iterator).VerStr();
+}
+
 char *pkg_iter_pretty(PCache *cache, PPkgIterator *wrapper) {
     assert(cache);
     assert(wrapper);
@@ -143,6 +153,7 @@ PVerIterator *pkg_iter_ver_iter(PPkgIterator *wrapper) {
     PVerIterator *new_wrapper = new PVerIterator();
     new_wrapper->iterator = wrapper->iterator.VersionList();
     new_wrapper->pkg = &wrapper->iterator;
+    new_wrapper->cache = wrapper->cache;
     return new_wrapper;
 }
 
@@ -177,4 +188,10 @@ const char *ver_iter_source_version(PVerIterator *wrapper) {
 
 const char *ver_iter_arch(PVerIterator *wrapper) {
     return wrapper->iterator.Arch();
+}
+
+int32_t ver_iter_priority(PVerIterator *wrapper) {
+    // The priority is a "short", which is roughly a (signed) int16_t;
+    // going bigger just in case
+    return wrapper->cache->cache_file->GetPolicy()->GetPriority(wrapper->iterator);
 }

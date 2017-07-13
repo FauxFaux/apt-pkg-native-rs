@@ -18,12 +18,15 @@ fn main() {
         println!("{}:{}:", view.name(), view.arch());
         let installed_version = view.current_version().unwrap_or("(none)".to_string());
         println!("  Installed: {}", installed_version);
-        println!("  Candidate: XXX");
+        println!("  Candidate: {}", view.candidate_version().unwrap_or("(none)".to_string()));
         println!("  Version table:");
         for version in view.versions().map(simple::Version::from_iter) {
-            println!(" {} {} XXX",
+            println!(" {} {} {}",
                      if version.version == installed_version { "***" } else { "   " },
-                     version.version);
+                     version.version,
+                     version.priority,
+            );
+            println!("        TODO: urls");
         }
     } else {
         println!("unrecognised package: {}", pkg);

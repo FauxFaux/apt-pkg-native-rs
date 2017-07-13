@@ -138,6 +138,13 @@ impl<'c> PkgIterator<'c> {
         }
     }
 
+    pub fn candidate_version(&self) -> Option<String> {
+        assert!(!self.is_empty());
+        unsafe {
+            make_owned_ascii_string(raw::pkg_iter_candidate_version(self.ptr))
+        }
+    }
+
     pub fn pretty_print(&self) -> String {
         assert!(!self.is_empty());
         unsafe {
@@ -281,6 +288,12 @@ impl<'c> VerIterator<'c> {
         unsafe {
             make_owned_ascii_string(raw::ver_iter_source_version(self.ptr))
                 .expect("versions always have a source_version")
+        }
+    }
+
+    pub fn priority(&self) -> i32 {
+        unsafe {
+            raw::ver_iter_priority(self.ptr)
         }
     }
 }

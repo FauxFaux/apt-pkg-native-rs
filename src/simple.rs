@@ -22,6 +22,7 @@ pub struct Version {
     pub section: String,
     pub source_package: String,
     pub source_version: String,
+    pub priority: i32,
 }
 
 
@@ -33,6 +34,7 @@ impl Version {
             section: iter.section(),
             source_package: iter.source_package(),
             source_version: iter.source_version(),
+            priority: iter.priority(),
         }
     }
 }
