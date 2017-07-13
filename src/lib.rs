@@ -1,4 +1,5 @@
-#[macro_use] extern crate lazy_static;
+#[macro_use]
+extern crate lazy_static;
 extern crate libc;
 
 mod raw;
@@ -27,7 +28,9 @@ mod tests {
         }
 
         {
-            let iter = cache.find_by_name("this-package-doesnt-exist-and-if-someone-makes-it-ill-be-really-angry");
+            let iter = cache.find_by_name(
+                "this-package-doesnt-exist-and-if-someone-makes-it-ill-be-really-angry",
+            );
             assert!(iter.is_empty());
         }
     }

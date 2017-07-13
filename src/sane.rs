@@ -8,14 +8,12 @@ use raw;
 /// Basically just a collection of related methods.
 #[derive(Debug)]
 pub struct Cache {
-    ptr: raw::PCache
+    ptr: raw::PCache,
 }
 
 impl Cache {
     pub fn get_singleton() -> Cache {
-        Cache {
-            ptr: raw::pkg_cache_get()
-        }
+        Cache { ptr: raw::pkg_cache_get() }
     }
 
     pub fn iter(&mut self) -> PkgIterator {
@@ -23,7 +21,7 @@ impl Cache {
             PkgIterator {
                 cache: self,
                 first: true,
-                ptr: raw::pkg_cache_pkg_iter(self.ptr)
+                ptr: raw::pkg_cache_pkg_iter(self.ptr),
             }
         }
     }
@@ -59,14 +57,12 @@ impl Cache {
 pub struct PkgIterator<'c> {
     cache: &'c Cache,
     first: bool,
-    ptr: raw::PPkgIterator
+    ptr: raw::PPkgIterator,
 }
 
 impl<'c> Drop for PkgIterator<'c> {
     fn drop(&mut self) {
-        unsafe {
-            raw::pkg_iter_release(self.ptr)
-        }
+        unsafe { raw::pkg_iter_release(self.ptr) }
     }
 }
 
@@ -87,11 +83,7 @@ impl<'c> PkgIterator<'c> {
             self.first = false;
 
             // we don't want to observe the end marker
-            if self.is_empty() {
-                None
-            } else {
-                Some(self)
-            }
+            if self.is_empty() { None } else { Some(self) }
         }
     }
 
@@ -100,17 +92,14 @@ impl<'c> PkgIterator<'c> {
     /// but useful for `find_..`.
     pub fn is_empty(&self) -> bool {
         // TODO: Can we get this inlined such that all the asserts will be eliminated?
-        unsafe {
-            raw::pkg_iter_end(self.ptr)
-        }
+        unsafe { raw::pkg_iter_end(self.ptr) }
     }
 
     pub fn map<F, B>(self, f: F) -> PkgMap<'c, F>
-    where F: FnMut(&PkgIterator) -> B {
-        PkgMap {
-            it: self,
-            f,
-        }
+    where
+        F: FnMut(&PkgIterator) -> B,
+    {
+        PkgMap { it: self, f }
     }
 }
 
@@ -134,16 +123,12 @@ impl<'c> PkgIterator<'c> {
 
     pub fn current_version(&self) -> Option<String> {
         assert!(!self.is_empty());
-        unsafe {
-            make_owned_ascii_string(raw::pkg_iter_current_version(self.ptr))
-        }
+        unsafe { make_owned_ascii_string(raw::pkg_iter_current_version(self.ptr)) }
     }
 
     pub fn candidate_version(&self) -> Option<String> {
         assert!(!self.is_empty());
-        unsafe {
-            make_owned_ascii_string(raw::pkg_iter_candidate_version(self.ptr))
-        }
+        unsafe { make_owned_ascii_string(raw::pkg_iter_candidate_version(self.ptr)) }
     }
 
     pub fn pretty_print(&self) -> String {
@@ -175,8 +160,9 @@ pub struct PkgMap<'c, F> {
 }
 
 impl<'c, B, F> Iterator for PkgMap<'c, F>
-where F: FnMut(&PkgIterator) -> B {
-
+where
+    F: FnMut(&PkgIterator) -> B,
+{
     type Item = B;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -192,9 +178,7 @@ pub struct VerIterator<'c> {
 
 impl<'c> Drop for VerIterator<'c> {
     fn drop(&mut self) {
-        unsafe {
-            raw::ver_iter_release(self.ptr)
-        }
+        unsafe { raw::ver_iter_release(self.ptr) }
     }
 }
 
@@ -213,11 +197,7 @@ impl<'c> VerIterator<'c> {
             self.first = false;
 
             // we don't want to observe the end marker
-            if self.is_empty() {
-                None
-            } else {
-                Some(self)
-            }
+            if self.is_empty() { None } else { Some(self) }
         }
     }
 
@@ -226,17 +206,14 @@ impl<'c> VerIterator<'c> {
     /// but useful for `find_..`.
     pub fn is_empty(&self) -> bool {
         // TODO: Can we get this inlined such that all the asserts will be eliminated?
-        unsafe {
-            raw::ver_iter_end(self.ptr)
-        }
+        unsafe { raw::ver_iter_end(self.ptr) }
     }
 
     pub fn map<F, B>(self, f: F) -> VerMap<'c, F>
-    where F: FnMut(&VerIterator) -> B {
-        VerMap {
-            it: self,
-            f,
-        }
+    where
+        F: FnMut(&VerIterator) -> B,
+    {
+        VerMap { it: self, f }
     }
 }
 
@@ -247,8 +224,9 @@ pub struct VerMap<'c, F> {
 }
 
 impl<'c, B, F> Iterator for VerMap<'c, F>
-where F: FnMut(&VerIterator) -> B {
-
+where
+    F: FnMut(&VerIterator) -> B,
+{
     type Item = B;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -293,9 +271,7 @@ impl<'c> VerIterator<'c> {
     }
 
     pub fn priority(&self) -> i32 {
-        unsafe {
-            raw::ver_iter_priority(self.ptr)
-        }
+        unsafe { raw::ver_iter_priority(self.ptr) }
     }
 }
 
@@ -303,9 +279,11 @@ unsafe fn make_owned_ascii_string(ptr: *const libc::c_char) -> Option<String> {
     if ptr.is_null() {
         None
     } else {
-        Some(ffi::CStr::from_ptr(ptr)
-            .to_str()
-            .expect("value should always be low-ascii")
-            .to_string())
+        Some(
+            ffi::CStr::from_ptr(ptr)
+                .to_str()
+                .expect("value should always be low-ascii")
+                .to_string(),
+        )
     }
 }

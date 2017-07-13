@@ -13,7 +13,7 @@ pub type PVerIterator = *mut c_void;
 #[link(name = "apt-pkg-c", kind = "static")]
 #[link(name = "apt-pkg")]
 #[link(name = "stdc++")]
-extern {
+extern "C" {
     /// Must be called exactly once, before anything else?
     fn init_config_system();
     fn pkg_cache_create() -> PCache;
@@ -24,7 +24,11 @@ extern {
 
     pub fn pkg_cache_pkg_iter(cache: PCache) -> PPkgIterator;
     pub fn pkg_cache_find_name(cache: PCache, name: *const c_char) -> PPkgIterator;
-    pub fn pkg_cache_find_name_arch(cache: PCache, name: *const c_char, arch: *const c_char) -> PPkgIterator;
+    pub fn pkg_cache_find_name_arch(
+        cache: PCache,
+        name: *const c_char,
+        arch: *const c_char,
+    ) -> PPkgIterator;
     pub fn pkg_iter_release(iterator: PPkgIterator);
 
     pub fn pkg_iter_next(iterator: PPkgIterator);
@@ -66,7 +70,7 @@ pub fn pkg_cache_get() -> PCache {
 }
 
 struct CacheHolder {
-    ptr: PCache
+    ptr: PCache,
 }
 
 unsafe impl Sync for CacheHolder {}
