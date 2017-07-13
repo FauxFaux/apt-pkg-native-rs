@@ -10,9 +10,7 @@ pub type PCache = *mut c_void;
 pub type PPkgIterator = *mut c_void;
 pub type PVerIterator = *mut c_void;
 
-#[link(name = "apt-pkg-c", kind = "static")]
 #[link(name = "apt-pkg")]
-#[link(name = "stdc++")]
 extern "C" {
     /// Must be called exactly once, before anything else?
     fn init_config_system();
