@@ -21,6 +21,7 @@ impl Cache {
         unsafe {
             PkgIterator {
                 cache: self,
+                first: true,
                 ptr: raw::pkg_cache_pkg_iter(self.ptr)
             }
         }
@@ -32,6 +33,7 @@ impl Cache {
             let ptr = raw::pkg_cache_find_name(self.ptr, name.as_ptr());
             PkgIterator {
                 cache: self,
+                first: true,
                 ptr,
             }
         }
@@ -44,6 +46,7 @@ impl Cache {
             let ptr = raw::pkg_cache_find_name_arch(self.ptr, name.as_ptr(), arch.as_ptr());
             PkgIterator {
                 cache: self,
+                first: true,
                 ptr,
             }
         }
@@ -54,6 +57,7 @@ impl Cache {
 #[derive(Debug)]
 pub struct PkgIterator<'c> {
     cache: &'c Cache,
+    first: bool,
     ptr: raw::PPkgIterator
 }
 
@@ -75,7 +79,11 @@ impl<'c> PkgIterator<'c> {
                 return None;
             }
 
-            raw::pkg_iter_next(self.ptr);
+            if !self.first {
+                raw::pkg_iter_next(self.ptr);
+            }
+
+            self.first = false;
 
             // we don't want to observe the end marker
             if self.is_empty() {
@@ -146,6 +154,7 @@ impl<'c> PkgIterator<'c> {
     pub fn versions(&self) -> VerIterator {
         VerIterator {
             cache: self.cache,
+            first: true,
             ptr: unsafe { raw::pkg_iter_ver_iter(self.ptr) },
         }
     }
@@ -169,6 +178,7 @@ where F: FnMut(&PkgIterator) -> B {
 
 pub struct VerIterator<'c> {
     cache: &'c Cache,
+    first: bool,
     ptr: raw::PVerIterator,
 }
 
@@ -188,7 +198,11 @@ impl<'c> VerIterator<'c> {
                 return None;
             }
 
-            raw::ver_iter_next(self.ptr);
+            if !self.first {
+                raw::ver_iter_next(self.ptr);
+            }
+
+            self.first = false;
 
             // we don't want to observe the end marker
             if self.is_empty() {

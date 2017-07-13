@@ -17,11 +17,11 @@ impl BinaryPackage {
 
 #[derive(Clone, Debug)]
 pub struct Version {
-    version: String,
-    arch: String,
-    section: String,
-    source_package: String,
-    source_version: String,
+    pub version: String,
+    pub arch: String,
+    pub section: String,
+    pub source_package: String,
+    pub source_version: String,
 }
 
 
