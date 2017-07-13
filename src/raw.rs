@@ -9,7 +9,7 @@ use libc::c_char;
 pub type PCache = *mut c_void;
 pub type PPkgIterator = *mut c_void;
 
-#[link(name = "apt-pkg-c")]
+#[link(name = "apt-pkg-c", kind = "static")]
 #[link(name = "apt-pkg")]
 #[link(name = "stdc++")]
 extern {

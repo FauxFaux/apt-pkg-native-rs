@@ -1,3 +1,5 @@
+extern crate gcc;
+
 fn main() {
-    println!("cargo:rustc-link-search=apt-pkg-c")
+    gcc::compile_library("libapt-pkg-c.a", &["apt-pkg-c/lib.cpp"]);
 }
