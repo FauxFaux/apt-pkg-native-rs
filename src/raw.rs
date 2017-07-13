@@ -6,8 +6,8 @@
 use libc::c_void;
 use libc::c_char;
 
-type PCache = *mut c_void;
-type PPkgIterator = *mut c_void;
+pub type PCache = *mut c_void;
+pub type PPkgIterator = *mut c_void;
 
 #[link(name = "apt-c")]
 #[link(name = "apt-pkg")]
@@ -19,7 +19,8 @@ extern {
     pub fn pkg_cache_pkg_iter(cache: PCache) -> PPkgIterator;
     pub fn pkg_iter_release(iterator: PPkgIterator);
 
-    pub fn pkg_iter_next(iterator: PPkgIterator) -> bool;
+    pub fn pkg_iter_next(iterator: PPkgIterator);
+    pub fn pkg_iter_end(iterator: PPkgIterator) -> bool;
 
     pub fn pkg_iter_name(iterator: PPkgIterator) -> *const c_char;
     pub fn pkg_iter_pretty(cache: PCache, iterator: PPkgIterator) -> *mut c_char;

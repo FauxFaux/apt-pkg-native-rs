@@ -29,7 +29,8 @@ extern "C" {
     PPkgIterator *pkg_cache_pkg_iter(PCache *cache);
     void pkg_iter_release(PPkgIterator *iterator);
 
-    bool pkg_iter_next(PPkgIterator *iterator);
+    void pkg_iter_next(PPkgIterator *iterator);
+    bool pkg_iter_end(PPkgIterator *iterator);
 
     const char *pkg_iter_name(PPkgIterator *iterator);
 
@@ -68,9 +69,12 @@ void pkg_iter_release(PPkgIterator *wrapper) {
     delete wrapper;
 }
 
-bool pkg_iter_next(PPkgIterator *wrapper) {
+void pkg_iter_next(PPkgIterator *wrapper) {
     ++wrapper->iterator;
-    return wrapper->cache->PkgEnd() != wrapper->iterator;
+}
+
+bool pkg_iter_end(PPkgIterator *wrapper) {
+    return wrapper->cache->PkgEnd() == wrapper->iterator;
 }
 
 const char *pkg_iter_name(PPkgIterator *wrapper) {
