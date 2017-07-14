@@ -78,13 +78,13 @@ impl fmt::Display for Version {
 pub struct Origin {
     pub file_name: String,
     pub archive: String,
-    pub version: String,
-    pub origin: String,
-    pub codename: String,
-    pub label: String,
-    pub site: String,
+    pub version: Option<String>,
+    pub origin: Option<String>,
+    pub codename: Option<String>,
+    pub label: Option<String>,
+    pub site: Option<String>,
     pub component: String,
-    pub architecture: String,
+    pub architecture: Option<String>,
     pub index_type: String,
 }
 
@@ -113,18 +113,26 @@ impl Origin {
 impl fmt::Display for Origin {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // trying to simulate apt-cache policy, but a lot of information is missing
-        write!(
-            f,
-            "TODO://{}/TODO(o:{}/l:{}/c:{}) {}/{} {} (f:{})",
-            self.site,
-            self.origin,
-            self.label,
-            self.codename,
-            self.archive,
-            self.component,
-            self.architecture,
-            self.file_name
-        )
+        if self.site.is_some() && self.origin.is_some() && self.label.is_some() && self.codename.is_some() && self.architecture.is_some() {
+            write!(
+                f,
+                "TODO://{}/TODO(o:{}/l:{}/c:{}) {}/{} {} (f:{})",
+                self.site.as_ref().unwrap(),
+                self.origin.as_ref().unwrap(),
+                self.label.as_ref().unwrap(),
+                self.codename.as_ref().unwrap(),
+                self.archive,
+                self.component,
+                self.architecture.as_ref().unwrap(),
+                self.file_name
+            )
+        } else {
+            write!(
+                f,
+                "{}",
+                self.file_name
+            )
+        }
     }
 }
 

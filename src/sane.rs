@@ -328,34 +328,29 @@ impl<'c> PkgFileView<'c> {
                 .expect("package file always has an archive")
         }
     }
-    pub fn version(&self) -> String {
+    pub fn version(&self) -> Option<String> {
         unsafe {
             make_owned_ascii_string(raw::pkg_file_iter_version(self.ptr))
-                .expect("package file always has a version")
         }
     }
-    pub fn origin(&self) -> String {
+    pub fn origin(&self) -> Option<String> {
         unsafe {
             make_owned_ascii_string(raw::pkg_file_iter_origin(self.ptr))
-                .expect("package file always has an origin")
         }
     }
-    pub fn codename(&self) -> String {
+    pub fn codename(&self) -> Option<String> {
         unsafe {
             make_owned_ascii_string(raw::pkg_file_iter_codename(self.ptr))
-                .expect("package file always has a codename")
         }
     }
-    pub fn label(&self) -> String {
+    pub fn label(&self) -> Option<String> {
         unsafe {
             make_owned_ascii_string(raw::pkg_file_iter_label(self.ptr))
-                .expect("package file always has a label")
         }
     }
-    pub fn site(&self) -> String {
+    pub fn site(&self) -> Option<String> {
         unsafe {
             make_owned_ascii_string(raw::pkg_file_iter_site(self.ptr))
-                .expect("package file always has a site")
         }
     }
     pub fn component(&self) -> String {
@@ -364,10 +359,9 @@ impl<'c> PkgFileView<'c> {
                 .expect("package file always has a component")
         }
     }
-    pub fn architecture(&self) -> String {
+    pub fn architecture(&self) -> Option<String> {
         unsafe {
             make_owned_ascii_string(raw::pkg_file_iter_architecture(self.ptr))
-                .expect("package file always has an architecture")
         }
     }
     pub fn index_type(&self) -> String {
