@@ -60,14 +60,14 @@ fn main() {
         }
     }
 
-    for src in lexographic_sort(source_versions.keys()) {
-        for ver in lexographic_sort(source_versions[src].iter()) {
+    for src in lexicographic_sort(source_versions.keys()) {
+        for ver in lexicographic_sort(source_versions[src].iter()) {
             println!("{}={}", src, ver);
         }
     }
 }
 
-fn lexographic_sort<I, T>(input: I) -> Vec<T>
+fn lexicographic_sort<I, T>(input: I) -> Vec<T>
 where
     T: Ord + Clone,
     I: Iterator<Item = T>,
