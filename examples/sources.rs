@@ -55,7 +55,7 @@ fn main() {
 
             source_versions
                 .entry(version.source_package())
-                .or_insert_with(|| HashSet::new())
+                .or_insert_with(HashSet::new)
                 .insert(version.source_version());
         }
     }
