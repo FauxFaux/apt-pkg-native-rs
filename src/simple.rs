@@ -74,6 +74,81 @@ impl fmt::Display for Version {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct Origin {
+    pub file_name: String,
+    pub archive: String,
+    pub version: String,
+    pub origin: String,
+    pub codename: String,
+    pub label: String,
+    pub site: String,
+    pub component: String,
+    pub architecture: String,
+    pub index_type: String,
+}
+
+impl Origin {
+    pub fn from_ver_file(view: &sane::VerFileView) -> Option<Self> {
+        // TODO: don't think this deref-ref should really be necessary?
+        view.file().next().map(|x| Self::new(&*x))
+    }
+
+    pub fn new(view: &sane::PkgFileView) -> Self {
+        Origin {
+            file_name: view.file_name(),
+            archive: view.archive(),
+            version: view.version(),
+            origin: view.origin(),
+            codename: view.codename(),
+            label: view.label(),
+            site: view.site(),
+            component: view.component(),
+            architecture: view.architecture(),
+            index_type: view.index_type(),
+        }
+    }
+}
+
+impl fmt::Display for Origin {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // trying to simulate apt-cache policy, but a lot of information is missing
+        write!(
+            f,
+            "TODO://{}/TODO(o:{}/l:{}/c:{}) {}/{} {} (f:{})",
+            self.site,
+            self.origin,
+            self.label,
+            self.codename,
+            self.archive,
+            self.component,
+            self.architecture,
+            self.file_name
+        )
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct VersionOrigins {
+    pub version: Version,
+    pub origins: Vec<Origin>,
+}
+
+impl VersionOrigins {
+    pub fn new(view: &sane::VerView) -> Self {
+        VersionOrigins {
+            version: Version::new(view),
+            origins: view.origin_iter()
+                .map(|o| {
+                    Origin::from_ver_file(o).expect(
+                        "a version's origin should always have a backing file",
+                    )
+                })
+                .collect(),
+        }
+    }
+}
+
 
 #[derive(Clone, Debug)]
 pub struct BinaryPackageVersions {

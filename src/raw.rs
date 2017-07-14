@@ -9,6 +9,8 @@ use libc::c_char;
 pub type PCache = *mut c_void;
 pub type PPkgIterator = *mut c_void;
 pub type PVerIterator = *mut c_void;
+pub type PVerFileIterator = *mut c_void;
+pub type PPkgFileIterator = *mut c_void;
 
 #[link(name = "apt-pkg-c", kind = "static")]
 #[link(name = "apt-pkg")]
@@ -61,6 +63,31 @@ extern "C" {
     pub fn ver_iter_source_version(iterator: PVerIterator) -> *mut c_char;
     pub fn ver_iter_arch(iterator: PVerIterator) -> *mut c_char;
     pub fn ver_iter_priority(iterator: PVerIterator) -> i32;
+
+    pub fn ver_iter_ver_file_iter(iterator: PVerIterator) -> PVerFileIterator;
+    pub fn ver_file_iter_release(iterator: PVerFileIterator);
+
+    pub fn ver_file_iter_next(iterator: PVerFileIterator);
+    pub fn ver_file_iter_end(iterator: PVerFileIterator) -> bool;
+
+
+    pub fn ver_file_iter_pkg_file_iter(iterator: PVerFileIterator) -> PPkgFileIterator;
+    pub fn pkg_file_iter_release(iterator: PPkgFileIterator);
+
+    pub fn pkg_file_iter_next(iterator: PPkgFileIterator);
+    pub fn pkg_file_iter_end(iterator: PPkgFileIterator) -> bool;
+
+
+    pub fn pkg_file_iter_file_name(iterator: PPkgFileIterator) -> *const c_char;
+    pub fn pkg_file_iter_archive(iterator: PPkgFileIterator) -> *const c_char;
+    pub fn pkg_file_iter_version(iterator: PPkgFileIterator) -> *const c_char;
+    pub fn pkg_file_iter_origin(iterator: PPkgFileIterator) -> *const c_char;
+    pub fn pkg_file_iter_codename(iterator: PPkgFileIterator) -> *const c_char;
+    pub fn pkg_file_iter_label(iterator: PPkgFileIterator) -> *const c_char;
+    pub fn pkg_file_iter_site(iterator: PPkgFileIterator) -> *const c_char;
+    pub fn pkg_file_iter_component(iterator: PPkgFileIterator) -> *const c_char;
+    pub fn pkg_file_iter_architecture(iterator: PPkgFileIterator) -> *const c_char;
+    pub fn pkg_file_iter_index_type(iterator: PPkgFileIterator) -> *const c_char;
 }
 
 pub fn pkg_cache_get() -> PCache {

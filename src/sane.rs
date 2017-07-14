@@ -1,11 +1,11 @@
 use std::marker::PhantomData;
 use std::ffi;
 
-use citer;
 use libc;
 use raw;
 
 use citer::CIterator;
+use citer::RawIterator;
 
 /// A reference to the package cache singleton,
 /// from which most functionality can be accessed.
@@ -62,8 +62,8 @@ pub struct PkgIterator<'c> {
 }
 
 impl<'c> PkgIterator<'c> {
-    fn new(cache: &'c Cache, ptr: raw::PCache) -> citer::CIterator<Self> {
-        citer::CIterator {
+    fn new(cache: &'c Cache, ptr: raw::PCache) -> CIterator<Self> {
+        CIterator {
             first: true,
             raw: PkgIterator { cache, ptr },
         }
@@ -77,7 +77,7 @@ pub struct PkgView<'c> {
     cache: &'c Cache,
 }
 
-impl<'c> citer::RawIterator for PkgIterator<'c> {
+impl<'c> RawIterator for PkgIterator<'c> {
     type View = PkgView<'c>;
 
     fn is_end(&self) -> bool {
@@ -151,7 +151,7 @@ pub struct VerView<'c> {
     ptr: raw::PVerIterator,
 }
 
-impl<'c> citer::RawIterator for VerIterator<'c> {
+impl<'c> RawIterator for VerIterator<'c> {
     type View = VerView<'c>;
 
     fn is_end(&self) -> bool {
@@ -212,6 +212,169 @@ impl<'c> VerView<'c> {
 
     pub fn priority(&self) -> i32 {
         unsafe { raw::ver_iter_priority(self.ptr) }
+    }
+
+    pub fn origin_iter(&self) -> CIterator<VerFileIterator> {
+        CIterator {
+            first: true,
+            raw: VerFileIterator {
+                cache: PhantomData,
+                ptr: unsafe { raw::ver_iter_ver_file_iter(self.ptr) },
+            },
+        }
+    }
+}
+
+/// An "iterator"/pointer to a point in a version's file list(?).
+pub struct VerFileIterator<'c> {
+    cache: PhantomData<&'c Cache>,
+    ptr: raw::PVerFileIterator,
+}
+
+// TODO: could this be a ref to the iterator?
+// TODO: Can't get the lifetimes to work.
+pub struct VerFileView<'c> {
+    cache: PhantomData<&'c Cache>,
+    ptr: raw::PVerFileIterator,
+}
+
+
+impl<'c> RawIterator for VerFileIterator<'c> {
+    type View = VerFileView<'c>;
+
+    fn is_end(&self) -> bool {
+        unsafe { raw::ver_file_iter_end(self.ptr) }
+    }
+
+    fn next(&mut self) {
+        unsafe { raw::ver_file_iter_next(self.ptr) }
+    }
+
+    fn as_view(&self) -> Self::View {
+        assert!(!self.is_end());
+
+        VerFileView {
+            ptr: self.ptr,
+            cache: self.cache,
+        }
+    }
+
+    fn release(&mut self) {
+        unsafe { raw::ver_file_iter_release(self.ptr) }
+    }
+}
+
+impl<'c> VerFileView<'c> {
+    pub fn file(&self) -> CIterator<PkgFileIterator> {
+        CIterator {
+            first: true,
+            raw: PkgFileIterator {
+                cache: PhantomData,
+                ptr: unsafe { raw::ver_file_iter_pkg_file_iter(self.ptr) },
+            },
+        }
+    }
+}
+
+
+/// An "iterator"/pointer to a point in a file list.
+pub struct PkgFileIterator<'c> {
+    cache: PhantomData<&'c Cache>,
+    ptr: raw::PVerFileIterator,
+}
+
+// TODO: could this be a ref to the iterator?
+// TODO: Can't get the lifetimes to work.
+pub struct PkgFileView<'c> {
+    cache: PhantomData<&'c Cache>,
+    ptr: raw::PVerFileIterator,
+}
+
+impl<'c> RawIterator for PkgFileIterator<'c> {
+    type View = PkgFileView<'c>;
+
+    fn is_end(&self) -> bool {
+        unsafe { raw::pkg_file_iter_end(self.ptr) }
+    }
+
+    fn next(&mut self) {
+        unsafe { raw::pkg_file_iter_next(self.ptr) }
+    }
+
+    fn as_view(&self) -> Self::View {
+        assert!(!self.is_end());
+
+        PkgFileView {
+            ptr: self.ptr,
+            cache: self.cache,
+        }
+    }
+
+    fn release(&mut self) {
+        unsafe { raw::pkg_file_iter_release(self.ptr) }
+    }
+}
+
+impl<'c> PkgFileView<'c> {
+    pub fn file_name(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::pkg_file_iter_file_name(self.ptr))
+                .expect("package file always has a file name")
+        }
+    }
+    pub fn archive(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::pkg_file_iter_archive(self.ptr))
+                .expect("package file always has an archive")
+        }
+    }
+    pub fn version(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::pkg_file_iter_version(self.ptr))
+                .expect("package file always has a version")
+        }
+    }
+    pub fn origin(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::pkg_file_iter_origin(self.ptr))
+                .expect("package file always has an origin")
+        }
+    }
+    pub fn codename(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::pkg_file_iter_codename(self.ptr))
+                .expect("package file always has a codename")
+        }
+    }
+    pub fn label(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::pkg_file_iter_label(self.ptr))
+                .expect("package file always has a label")
+        }
+    }
+    pub fn site(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::pkg_file_iter_site(self.ptr))
+                .expect("package file always has a site")
+        }
+    }
+    pub fn component(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::pkg_file_iter_component(self.ptr))
+                .expect("package file always has a component")
+        }
+    }
+    pub fn architecture(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::pkg_file_iter_architecture(self.ptr))
+                .expect("package file always has an architecture")
+        }
+    }
+    pub fn index_type(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::pkg_file_iter_index_type(self.ptr))
+                .expect("package file always has a index_type")
+        }
     }
 }
 

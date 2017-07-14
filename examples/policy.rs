@@ -31,14 +31,18 @@ fn main() {
         );
 
         println!("  Version table:");
-        for version in view.versions().map(simple::Version::new) {
+        for simple::VersionOrigins { version, origins } in
+            view.versions().map(simple::VersionOrigins::new)
+        {
             println!(" {} {} {}",
                      if version.version == installed_version { "***" } else { "   " },
                      version.version,
                      version.priority,
             );
 
-            println!("        TODO: urls");
+            for origin in origins {
+                println!("       {:4} {}", "XXX", origin);
+            }
         }
     } else {
         println!("unrecognised package: {}", pkg);
