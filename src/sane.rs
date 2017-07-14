@@ -329,29 +329,19 @@ impl<'c> PkgFileView<'c> {
         }
     }
     pub fn version(&self) -> Option<String> {
-        unsafe {
-            make_owned_ascii_string(raw::pkg_file_iter_version(self.ptr))
-        }
+        unsafe { make_owned_ascii_string(raw::pkg_file_iter_version(self.ptr)) }
     }
     pub fn origin(&self) -> Option<String> {
-        unsafe {
-            make_owned_ascii_string(raw::pkg_file_iter_origin(self.ptr))
-        }
+        unsafe { make_owned_ascii_string(raw::pkg_file_iter_origin(self.ptr)) }
     }
     pub fn codename(&self) -> Option<String> {
-        unsafe {
-            make_owned_ascii_string(raw::pkg_file_iter_codename(self.ptr))
-        }
+        unsafe { make_owned_ascii_string(raw::pkg_file_iter_codename(self.ptr)) }
     }
     pub fn label(&self) -> Option<String> {
-        unsafe {
-            make_owned_ascii_string(raw::pkg_file_iter_label(self.ptr))
-        }
+        unsafe { make_owned_ascii_string(raw::pkg_file_iter_label(self.ptr)) }
     }
     pub fn site(&self) -> Option<String> {
-        unsafe {
-            make_owned_ascii_string(raw::pkg_file_iter_site(self.ptr))
-        }
+        unsafe { make_owned_ascii_string(raw::pkg_file_iter_site(self.ptr)) }
     }
     pub fn component(&self) -> String {
         unsafe {
@@ -360,9 +350,7 @@ impl<'c> PkgFileView<'c> {
         }
     }
     pub fn architecture(&self) -> Option<String> {
-        unsafe {
-            make_owned_ascii_string(raw::pkg_file_iter_architecture(self.ptr))
-        }
+        unsafe { make_owned_ascii_string(raw::pkg_file_iter_architecture(self.ptr)) }
     }
     pub fn index_type(&self) -> String {
         unsafe {

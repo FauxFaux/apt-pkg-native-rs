@@ -113,7 +113,9 @@ impl Origin {
 impl fmt::Display for Origin {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // trying to simulate apt-cache policy, but a lot of information is missing
-        if self.site.is_some() && self.origin.is_some() && self.label.is_some() && self.codename.is_some() && self.architecture.is_some() {
+        if self.site.is_some() && self.origin.is_some() && self.label.is_some() &&
+            self.codename.is_some() && self.architecture.is_some()
+        {
             write!(
                 f,
                 "TODO://{}/TODO(o:{}/l:{}/c:{}) {}/{} {} (f:{})",
@@ -127,11 +129,7 @@ impl fmt::Display for Origin {
                 self.file_name
             )
         } else {
-            write!(
-                f,
-                "{}",
-                self.file_name
-            )
+            write!(f, "{}", self.file_name)
         }
     }
 }
