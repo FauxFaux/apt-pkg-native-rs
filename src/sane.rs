@@ -74,7 +74,7 @@ impl<'c> PkgIterator<'c> {
 // TODO: Can't get the lifetimes to work.
 pub struct PkgView<'c> {
     ptr: raw::PPkgIterator,
-    cache: &'c Cache,
+    cache: PhantomData<&'c Cache>,
 }
 
 impl<'c> RawIterator for PkgIterator<'c> {
@@ -93,7 +93,7 @@ impl<'c> RawIterator for PkgIterator<'c> {
 
         PkgView {
             ptr: self.ptr,
-            cache: self.cache,
+            cache: PhantomData,
         }
     }
 
