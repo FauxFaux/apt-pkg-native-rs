@@ -36,32 +36,35 @@ fn main() {
     let archive_filter = env::args().nth(1);
 
     let mut cache = Cache::get_singleton();
-    let mut all_packages = cache.iter();
-
     let mut source_versions = HashMap::new();
-    while let Some(binary) = all_packages.next() {
+    {
+        let mut all_packages = cache.iter();
 
-        let mut binary_versions = binary.versions();
-        while let Some(version) = binary_versions.next() {
-            if let Some(ref target_archive) = archive_filter {
-                if version
-                    .origin_iter()
-                    .map(|origin| origin.file().next().unwrap().archive())
-                    .any(|archive| archive == *target_archive)
-                {
-                    continue;
+        while let Some(binary) = all_packages.next() {
+            let mut binary_versions = binary.versions();
+            while let Some(version) = binary_versions.next() {
+                if let Some(ref target_archive) = archive_filter {
+                    if version
+                        .origin_iter()
+                        .map(|origin| origin.file().next().unwrap().archive())
+                        .any(|archive| archive == *target_archive)
+                    {
+                        continue;
+                    }
                 }
-            }
 
-            source_versions
-                .entry(version.source_package())
-                .or_insert_with(HashSet::new)
-                .insert(version.source_version());
+                source_versions
+                    .entry(version.source_package())
+                    .or_insert_with(HashSet::new)
+                    .insert(version.source_version());
+            }
         }
     }
 
     for src in lexicographic_sort(source_versions.keys()) {
-        for ver in lexicographic_sort(source_versions[src].iter()) {
+        let mut sorted_versions: Vec<&String> = source_versions[src].iter().collect();
+        sorted_versions.sort_by(|left, right| cache.compare_versions(left, right));
+        for ver in sorted_versions {
             println!("{}={}", src, ver);
         }
     }
