@@ -3,8 +3,9 @@
 
 #include <assert.h>
 
-#include <apt-pkg/pkgcache.h>
 #include <apt-pkg/cachefile.h>
+#include <apt-pkg/pkgcache.h>
+#include <apt-pkg/version.h>
 
 struct PCache {
     // Owned by us.
@@ -47,6 +48,8 @@ extern "C" {
     void init_config_system();
 
     PCache *pkg_cache_create();
+
+    int32_t pkg_cache_compare_versions(PCache *cache, const char *left, const char *right);
 
     // pkg_iter creation and deletion
     PPkgIterator *pkg_cache_pkg_iter(PCache *cache);
@@ -135,6 +138,11 @@ void pkg_cache_release(PCache *cache) {
     // TODO: is cache->cache cleaned up with cache->cache_file?
     delete cache->cache_file;
     delete cache;
+}
+
+int32_t pkg_cache_compare_versions(PCache *cache, const char *left, const char *right) {
+    // an int is returned here; presumably it will always be -1, 0 or 1.
+    return cache->cache->VS->DoCmpVersion(left, left+strlen(left), right, right+strlen(right));
 }
 
 PPkgIterator *pkg_cache_pkg_iter(PCache *cache) {

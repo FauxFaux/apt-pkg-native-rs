@@ -74,4 +74,13 @@ mod tests {
         );
 
     }
+
+    #[test]
+    fn compare_versions() {
+        use std::cmp::Ordering;
+        let cache = Cache::get_singleton();
+        assert_eq!(Ordering::Less, cache.compare_versions("3.0", "3.1"));
+        assert_eq!(Ordering::Greater, cache.compare_versions("3.1", "3.0"));
+        assert_eq!(Ordering::Equal, cache.compare_versions("3.0", "3.0"));
+    }
 }

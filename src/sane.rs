@@ -1,3 +1,4 @@
+use std::cmp;
 use std::marker::PhantomData;
 use std::ffi;
 
@@ -50,6 +51,29 @@ impl Cache {
             let arch = ffi::CString::new(arch).unwrap();
             let ptr = raw::pkg_cache_find_name_arch(self.ptr, name.as_ptr(), arch.as_ptr());
             PkgIterator::new(self, ptr)
+        }
+    }
+
+    /// Compare two versions, returning an `Ordering`, as used by most Rusty `sort()` methods.
+    ///
+    /// This uses the "versioning scheme" currently set, which, in theory, can change,
+    /// but in practice is always the "Standard .deb" scheme. As of 2017, there aren't even any
+    /// other implementations. As such, this may eventually become a static method somewhere.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # let mut cache = apt_pkg_native::Cache::get_singleton();
+    /// let mut packages = vec!["3.0", "3.1", "3.0~1"];
+    /// packages.sort_by(|left, right| cache.compare_versions(left, right));
+    /// assert_eq!(vec!["3.0~1", "3.0", "3.1"], packages);
+    /// ```
+    pub fn compare_versions(&self, left: &str, right: &str) -> cmp::Ordering {
+        unsafe {
+            let left = ffi::CString::new(left).unwrap();
+            let right = ffi::CString::new(right).unwrap();
+
+            raw::pkg_cache_compare_versions(self.ptr, left.as_ptr(), right.as_ptr()).cmp(&0)
         }
     }
 }

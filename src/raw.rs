@@ -19,6 +19,7 @@ extern "C" {
     fn init_config_system();
     fn pkg_cache_create() -> PCache;
 
+    pub fn pkg_cache_compare_versions(cache: PCache, left: *const c_char, right: *const c_char) -> i32;
 
     // Package iterators
     // =================
