@@ -1,6 +1,6 @@
 [package]
 name = "apt-pkg-native"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Chris West (Faux) <git@goeswhere.com>"]
 
 description = "Bindings for libapt-pkg"
