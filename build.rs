@@ -5,7 +5,7 @@ const SRC: &str = "apt-pkg-c/lib.cpp";
 fn main() {
     println!("cargo:rerun-if-changed={}", SRC);
 
-    gcc::Config::new()
+    gcc::Build::new()
         .file(SRC)
         .cpp(true)
         .flag("-std=gnu++11")
