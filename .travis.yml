@@ -8,8 +8,11 @@ matrix:
   allow_failures:
     - rust: nightly
 
-before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y libapt-pkg-dev build-essential
+addons:
+  apt:
+    packages:
+    - build-essential
+    - libapt-pkg-dev
 
 dist: trusty
+sudo: false
