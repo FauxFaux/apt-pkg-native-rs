@@ -22,4 +22,5 @@ lazy_static = "0.2.9"
 libc = "0.2.32"
 
 [dev-dependencies]
+boolinator = "2.4.0"
 itertools = "0.7.1"

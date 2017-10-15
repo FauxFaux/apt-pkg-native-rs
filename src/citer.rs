@@ -81,6 +81,40 @@ where
         CMap { it: self, f }
     }
 
+    pub fn filter_map<F, B>(self, f: F) -> CFilterMap<R, F>
+    where
+        F: FnMut(&R::View) -> Option<B>,
+    {
+        CFilterMap { it: self, f }
+    }
+
+    pub fn any<F>(mut self, mut f: F) -> bool
+    where
+        F: FnMut(&R::View) -> bool,
+    {
+        while let Some(view) = self.next() {
+            if (f)(&view) {
+                return true;
+            }
+        }
+
+        false
+    }
+
+
+    pub fn all<F>(mut self, mut f: F) -> bool
+    where
+        F: FnMut(&R::View) -> bool,
+    {
+        while let Some(view) = self.next() {
+            if !(f)(&view) {
+                return false;
+            }
+        }
+
+        true
+    }
+
     pub fn count(mut self) -> usize {
         // Not sure this is actually better than self.map(|_| ()).count()
 
@@ -115,6 +149,36 @@ where
         match self.it.next() {
             Some(ref x) => Some((self.f)(x)),
             None => None,
+        }
+    }
+}
+
+#[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
+pub struct CFilterMap<R, F>
+where
+    R: RawIterator,
+{
+    it: CIterator<R>,
+    f: F,
+}
+
+impl<B, R, F> Iterator for CFilterMap<R, F>
+where
+    R: RawIterator,
+    F: FnMut(&R::View) -> Option<B>,
+{
+    type Item = B;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            match self.it.next() {
+                Some(ref x) => {
+                    if let Some(y) = (self.f)(x) {
+                        return Some(y);
+                    }
+                }
+                None => return None,
+            }
         }
     }
 }

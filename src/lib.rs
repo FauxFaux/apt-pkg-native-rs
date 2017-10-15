@@ -72,6 +72,11 @@ mod tests {
                 .next()
                 .is_none()
         );
+    }
+
+    #[test]
+    fn find_by_filter_map() {
+        let mut cache = Cache::get_singleton();
 
     }
 
