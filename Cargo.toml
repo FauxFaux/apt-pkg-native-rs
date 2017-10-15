@@ -18,8 +18,8 @@ repository = "FauxFaux/apt-pkg-native-rs"
 gcc = "0.3.54"
 
 [dependencies]
-lazy_static = "0.2.8"
-libc = "0.2.30"
+lazy_static = "0.2.9"
+libc = "0.2.32"
 
 [dev-dependencies]
-itertools = "0.6.2"
+itertools = "0.7.1"
