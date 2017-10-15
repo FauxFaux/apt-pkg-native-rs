@@ -20,3 +20,16 @@ While the code in this crate is available under a permissive MIT license,
 
 `libapt-pkg-dev` must be installed. The [`gcc`](https://crates.io/crates/gcc)
   crate is used to try and find a native compiler.
+
+### Thread safety
+
+It is intended that the crate should be usable from multiple threads.
+However, this is generally implemented using singletons, which may be really
+annoying for your use-case.
+
+`apt` does not have a concurrency model: you may not use threads.
+
+Since `apt` 1.4 or 1.5 (in Debian Stretch (2017), but not in Xenial 16.04),
+some operations are thread safe: it should be possible to initialise the cache
+twice in parallel. As these versions of `apt` are not widespread, the API of
+this crate does not attempt to expose this.
