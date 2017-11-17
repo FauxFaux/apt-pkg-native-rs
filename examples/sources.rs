@@ -23,7 +23,6 @@
 ///         for ver in sorted(sources[src]):
 ///             print('{}={}'.format(src, ver))
 /// ```
-
 extern crate apt_pkg_native;
 use std::env;
 

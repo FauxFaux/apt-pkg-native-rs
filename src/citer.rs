@@ -172,11 +172,9 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             match self.it.next() {
-                Some(ref x) => {
-                    if let Some(y) = (self.f)(x) {
-                        return Some(y);
-                    }
-                }
+                Some(ref x) => if let Some(y) = (self.f)(x) {
+                    return Some(y);
+                },
                 None => return None,
             }
         }

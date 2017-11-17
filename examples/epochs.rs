@@ -11,8 +11,7 @@ fn main() {
         f.versions()
             .any(|version| version.version().contains(':'))
             .as_some_from(|| f.name())
-    })
-    {
+    }) {
         println!("{}", item);
     }
 }

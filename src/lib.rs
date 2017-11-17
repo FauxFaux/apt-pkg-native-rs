@@ -67,7 +67,7 @@ mod tests {
         assert!(
             cache
                 .find_by_name(
-                    "this-package-doesnt-exist-and-if-someone-makes-it-ill-be-really-angry",
+                    "this-package-doesnt-exist-and-if-someone-makes-it-ill-be-really-angry"
                 )
                 .next()
                 .is_none()
@@ -77,7 +77,6 @@ mod tests {
     #[test]
     fn find_by_filter_map() {
         let mut cache = Cache::get_singleton();
-
     }
 
     #[test]

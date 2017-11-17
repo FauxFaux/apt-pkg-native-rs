@@ -1,6 +1,6 @@
 use std::cmp;
-use std::marker::PhantomData;
 use std::ffi;
+use std::marker::PhantomData;
 
 use libc;
 use raw;
@@ -18,7 +18,9 @@ pub struct Cache {
 impl Cache {
     /// Get a reference to the singleton.
     pub fn get_singleton() -> Cache {
-        Cache { ptr: raw::pkg_cache_get() }
+        Cache {
+            ptr: raw::pkg_cache_get(),
+        }
     }
 
     /// Walk through all of the packages, in a random order.
