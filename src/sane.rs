@@ -24,6 +24,16 @@ impl Cache {
         }
     }
 
+    /// Drop the cache, and re-create it from scratch.
+    ///
+    /// It's super important that there are no other outstanding
+    /// references to the cache at this point. Again, I remind you
+    /// not to try and outsmart the borrow checker. It doesn't know
+    /// how much trouble there is in here.
+    pub fn reload(&mut self) {
+        self.ptr_mutex.lock().expect("poisoned mutex").re_up()
+    }
+
     /// Walk through all of the packages, in a random order.
     ///
     /// If there are multiple architectures, multiple architectures will be returned.

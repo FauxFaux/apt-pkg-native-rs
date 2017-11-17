@@ -20,6 +20,7 @@ extern "C" {
     /// Must be called exactly once, before anything else?
     fn init_config_system();
     fn pkg_cache_create() -> PCache;
+    fn pkg_cache_release(cache: PCache);
 
     pub fn pkg_cache_compare_versions(
         cache: PCache,
@@ -107,6 +108,15 @@ pub struct CacheHolder {
 }
 
 unsafe impl Send for CacheHolder {}
+
+impl CacheHolder {
+    pub fn re_up(&mut self) {
+        unsafe {
+            pkg_cache_release(self.ptr);
+            self.ptr = pkg_cache_create();
+        }
+    }
+}
 
 lazy_static! {
     #[derive(Debug)]

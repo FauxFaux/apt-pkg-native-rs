@@ -87,4 +87,13 @@ mod tests {
         assert_eq!(Ordering::Greater, cache.compare_versions("3.1", "3.0"));
         assert_eq!(Ordering::Equal, cache.compare_versions("3.0", "3.0"));
     }
+
+    #[test]
+    fn reload() {
+        let mut cache = Cache::get_singleton();
+        cache.reload();
+        cache.reload();
+        cache.reload();
+        cache.reload();
+    }
 }

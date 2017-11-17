@@ -48,6 +48,7 @@ extern "C" {
     void init_config_system();
 
     PCache *pkg_cache_create();
+    void pkg_cache_release(PCache *cache);
 
     int32_t pkg_cache_compare_versions(PCache *cache, const char *left, const char *right);
 
@@ -133,7 +134,6 @@ PCache *pkg_cache_create() {
     return ret;
 }
 
-// TODO: we don't expose this so we always leak the wrapper.
 void pkg_cache_release(PCache *cache) {
     // TODO: is cache->cache cleaned up with cache->cache_file?
     delete cache->cache_file;
