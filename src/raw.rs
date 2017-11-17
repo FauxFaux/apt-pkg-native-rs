@@ -98,8 +98,8 @@ extern "C" {
     pub fn pkg_file_iter_index_type(iterator: PPkgFileIterator) -> *const c_char;
 }
 
-pub fn pkg_cache_get() -> &'static CACHE {
-    &CACHE
+pub fn pkg_cache_get_singleton() -> &'static CACHE_SINGLETON {
+    &CACHE_SINGLETON
 }
 
 #[derive(Debug)]
@@ -111,7 +111,7 @@ unsafe impl Send for CacheHolder {}
 
 lazy_static! {
     #[derive(Debug)]
-    pub static ref CACHE: Mutex<CacheHolder> = {
+    pub static ref CACHE_SINGLETON: Mutex<CacheHolder> = {
         unsafe {
             init_config_system();
             Mutex::new(CacheHolder {

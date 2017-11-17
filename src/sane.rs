@@ -14,14 +14,14 @@ use citer::RawIterator;
 /// from which most functionality can be accessed.
 #[derive(Debug)]
 pub struct Cache {
-    ptr: &'static raw::CACHE,
+    ptr_mutex: &'static raw::CACHE_SINGLETON,
 }
 
 impl Cache {
     /// Get a reference to the singleton.
     pub fn get_singleton() -> Cache {
         Cache {
-            ptr: raw::pkg_cache_get(),
+            ptr_mutex: raw::pkg_cache_get_singleton(),
         }
     }
 
@@ -31,7 +31,7 @@ impl Cache {
     ///
     /// See the module documentation for apologies about how this isn't an iterator.
     pub fn iter(&mut self) -> CIterator<PkgIterator> {
-        let lock = self.ptr.lock().unwrap();
+        let lock = self.ptr_mutex.lock().expect("poisoned mutex");
         unsafe {
             let raw_iter = raw::pkg_cache_pkg_iter(lock.ptr);
             PkgIterator::new(lock, raw_iter)
@@ -43,7 +43,7 @@ impl Cache {
     ///
     /// The returned iterator will either be at the end, or at a package with the name.
     pub fn find_by_name(&mut self, name: &str) -> CIterator<PkgIterator> {
-        let lock = self.ptr.lock().unwrap();
+        let lock = self.ptr_mutex.lock().expect("poisoned mutex");
         unsafe {
             let name = ffi::CString::new(name).unwrap();
             let ptr = raw::pkg_cache_find_name(lock.ptr, name.as_ptr());
@@ -55,7 +55,7 @@ impl Cache {
     ///
     /// The returned iterator will either be at the end, or at a matching package.
     pub fn find_by_name_arch(&mut self, name: &str, arch: &str) -> CIterator<PkgIterator> {
-        let lock = self.ptr.lock().unwrap();
+        let lock = self.ptr_mutex.lock().expect("poisoned mutex");
         unsafe {
             let name = ffi::CString::new(name).unwrap();
             let arch = ffi::CString::new(arch).unwrap();
@@ -83,7 +83,7 @@ impl Cache {
             let left = ffi::CString::new(left).unwrap();
             let right = ffi::CString::new(right).unwrap();
 
-            let lock = self.ptr.lock().unwrap();
+            let lock = self.ptr_mutex.lock().expect("poisoned mutex");
             raw::pkg_cache_compare_versions(lock.ptr, left.as_ptr(), right.as_ptr()).cmp(&0)
         }
     }
