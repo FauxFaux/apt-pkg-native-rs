@@ -1,7 +1,6 @@
 use std::cmp;
 use std::ffi;
 use std::marker::PhantomData;
-use std::sync::Mutex;
 use std::sync::MutexGuard;
 
 use libc;
@@ -108,8 +107,8 @@ impl<'c> PkgIterator<'c> {
 // TODO: could this be a ref to the iterator?
 // TODO: Can't get the lifetimes to work.
 pub struct PkgView<'c> {
+    cache: PhantomData<&'c MutexGuard<'c, raw::CacheHolder>>,
     ptr: raw::PPkgIterator,
-    cache: PhantomData<&'c Cache>,
 }
 
 impl<'c> RawIterator for PkgIterator<'c> {
@@ -175,14 +174,12 @@ impl<'c> PkgView<'c> {
 
 /// An "iterator"/pointer to a point in a version list.
 pub struct VerIterator<'c> {
-    cache: PhantomData<&'c Cache>,
+    cache: PhantomData<&'c MutexGuard<'c, raw::CacheHolder>>,
     ptr: raw::PVerIterator,
 }
 
-// TODO: could this be a ref to the iterator?
-// TODO: Can't get the lifetimes to work.
 pub struct VerView<'c> {
-    cache: PhantomData<&'c Cache>,
+    cache: PhantomData<&'c MutexGuard<'c, raw::CacheHolder>>,
     ptr: raw::PVerIterator,
 }
 
@@ -262,14 +259,14 @@ impl<'c> VerView<'c> {
 
 /// An "iterator"/pointer to a point in a version's file list(?).
 pub struct VerFileIterator<'c> {
-    cache: PhantomData<&'c Cache>,
+    cache: PhantomData<&'c MutexGuard<'c, raw::CacheHolder>>,
     ptr: raw::PVerFileIterator,
 }
 
 // TODO: could this be a ref to the iterator?
 // TODO: Can't get the lifetimes to work.
 pub struct VerFileView<'c> {
-    cache: PhantomData<&'c Cache>,
+    cache: PhantomData<&'c MutexGuard<'c, raw::CacheHolder>>,
     ptr: raw::PVerFileIterator,
 }
 
@@ -314,14 +311,14 @@ impl<'c> VerFileView<'c> {
 
 /// An "iterator"/pointer to a point in a file list.
 pub struct PkgFileIterator<'c> {
-    cache: PhantomData<&'c Cache>,
+    cache: PhantomData<&'c MutexGuard<'c, raw::CacheHolder>>,
     ptr: raw::PVerFileIterator,
 }
 
 // TODO: could this be a ref to the iterator?
 // TODO: Can't get the lifetimes to work.
 pub struct PkgFileView<'c> {
-    cache: PhantomData<&'c Cache>,
+    cache: PhantomData<&'c MutexGuard<'c, raw::CacheHolder>>,
     ptr: raw::PVerFileIterator,
 }
 

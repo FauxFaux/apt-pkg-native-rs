@@ -4,7 +4,6 @@
 ///  * `*mut c_chars` are to be freed by `libc::free`.
 
 use std::sync::Mutex;
-use std::sync::MutexGuard;
 
 use libc::c_void;
 use libc::c_char;
