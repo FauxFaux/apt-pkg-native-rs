@@ -75,11 +75,6 @@ mod tests {
     }
 
     #[test]
-    fn find_by_filter_map() {
-        let mut cache = Cache::get_singleton();
-    }
-
-    #[test]
     fn compare_versions() {
         use std::cmp::Ordering;
         let cache = Cache::get_singleton();
