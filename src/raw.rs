@@ -3,6 +3,9 @@
 ///  * `*const c_chars` are short-term borrows
 ///  * `*mut c_chars` are to be freed by `libc::free`.
 
+use std::sync::Mutex;
+use std::sync::MutexGuard;
+
 use libc::c_void;
 use libc::c_char;
 
@@ -95,23 +98,25 @@ extern "C" {
     pub fn pkg_file_iter_index_type(iterator: PPkgFileIterator) -> *const c_char;
 }
 
-pub fn pkg_cache_get() -> PCache {
-    CACHE.ptr
+pub fn pkg_cache_get() -> &'static CACHE {
+    &CACHE
 }
 
-struct CacheHolder {
-    ptr: PCache,
+#[derive(Debug)]
+pub struct CacheHolder {
+    pub ptr: PCache,
 }
 
-unsafe impl Sync for CacheHolder {}
+unsafe impl Send for CacheHolder {}
 
 lazy_static! {
-    static ref CACHE: CacheHolder = {
+    #[derive(Debug)]
+    pub static ref CACHE: Mutex<CacheHolder> = {
         unsafe {
             init_config_system();
-            CacheHolder {
+            Mutex::new(CacheHolder {
                 ptr: pkg_cache_create()
-            }
+            })
         }
     };
 }

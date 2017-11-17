@@ -1,6 +1,8 @@
 use std::cmp;
 use std::ffi;
 use std::marker::PhantomData;
+use std::sync::Mutex;
+use std::sync::MutexGuard;
 
 use libc;
 use raw;
@@ -12,7 +14,7 @@ use citer::RawIterator;
 /// from which most functionality can be accessed.
 #[derive(Debug)]
 pub struct Cache {
-    ptr: raw::PCache,
+    ptr: &'static raw::CACHE,
 }
 
 impl Cache {
@@ -29,7 +31,11 @@ impl Cache {
     ///
     /// See the module documentation for apologies about how this isn't an iterator.
     pub fn iter(&mut self) -> CIterator<PkgIterator> {
-        unsafe { PkgIterator::new(self, raw::pkg_cache_pkg_iter(self.ptr)) }
+        let lock = self.ptr.lock().unwrap();
+        unsafe {
+            let raw_iter = raw::pkg_cache_pkg_iter(lock.ptr);
+            PkgIterator::new(lock, raw_iter)
+        }
     }
 
     /// Find a package by name. It's not clear whether this picks a random arch,
@@ -37,10 +43,11 @@ impl Cache {
     ///
     /// The returned iterator will either be at the end, or at a package with the name.
     pub fn find_by_name(&mut self, name: &str) -> CIterator<PkgIterator> {
+        let lock = self.ptr.lock().unwrap();
         unsafe {
             let name = ffi::CString::new(name).unwrap();
-            let ptr = raw::pkg_cache_find_name(self.ptr, name.as_ptr());
-            PkgIterator::new(self, ptr)
+            let ptr = raw::pkg_cache_find_name(lock.ptr, name.as_ptr());
+            PkgIterator::new(lock, ptr)
         }
     }
 
@@ -48,11 +55,12 @@ impl Cache {
     ///
     /// The returned iterator will either be at the end, or at a matching package.
     pub fn find_by_name_arch(&mut self, name: &str, arch: &str) -> CIterator<PkgIterator> {
+        let lock = self.ptr.lock().unwrap();
         unsafe {
             let name = ffi::CString::new(name).unwrap();
             let arch = ffi::CString::new(arch).unwrap();
-            let ptr = raw::pkg_cache_find_name_arch(self.ptr, name.as_ptr(), arch.as_ptr());
-            PkgIterator::new(self, ptr)
+            let ptr = raw::pkg_cache_find_name_arch(lock.ptr, name.as_ptr(), arch.as_ptr());
+            PkgIterator::new(lock, ptr)
         }
     }
 
@@ -75,7 +83,8 @@ impl Cache {
             let left = ffi::CString::new(left).unwrap();
             let right = ffi::CString::new(right).unwrap();
 
-            raw::pkg_cache_compare_versions(self.ptr, left.as_ptr(), right.as_ptr()).cmp(&0)
+            let lock = self.ptr.lock().unwrap();
+            raw::pkg_cache_compare_versions(lock.ptr, left.as_ptr(), right.as_ptr()).cmp(&0)
         }
     }
 }
@@ -83,12 +92,12 @@ impl Cache {
 /// An "iterator"/pointer to a point in a package list.
 #[derive(Debug)]
 pub struct PkgIterator<'c> {
-    cache: &'c Cache,
+    cache: MutexGuard<'c, raw::CacheHolder>,
     ptr: raw::PPkgIterator,
 }
 
 impl<'c> PkgIterator<'c> {
-    fn new(cache: &'c Cache, ptr: raw::PCache) -> CIterator<Self> {
+    fn new(cache: MutexGuard<'c, raw::CacheHolder>, ptr: raw::PCache) -> CIterator<Self> {
         CIterator {
             first: true,
             raw: PkgIterator { cache, ptr },
