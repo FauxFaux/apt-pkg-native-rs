@@ -27,6 +27,10 @@ It is intended that the crate should be usable from multiple threads.
 However, this is generally implemented using singletons, which may be really
 annoying for your use-case.
 
+The current way the singleton is managed is awful, and it's not been fixed
+while I've been learning about the problems. A major version bump, and a
+proper singleton, may resolve some of the issues. This needs to be done eventually.
+
 `apt` does not have a concurrency model: you may not use threads.
 
 Since `apt` 1.4 or 1.5 (in Debian Stretch (2017), but not in Xenial 16.04),
