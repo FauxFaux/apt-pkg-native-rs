@@ -21,6 +21,12 @@ While the code in this crate is available under a permissive MIT license,
 `libapt-pkg-dev` must be installed. The [`gcc`](https://crates.io/crates/gcc)
   crate is used to try and find a native compiler.
 
+The `ye-olde-apt` feature provides support for `apt <1.2` (Ubuntu 14.04 (Trusty),
+Debian 7 (Jessie) (2015)). This works by just deleting methods which are not
+available in that version. See
+[#2](https://github.com/FauxFaux/apt-pkg-native-rs/issues/2#issuecomment-351180818).
+
+
 ### Thread safety
 
 It is intended that the crate should be usable from multiple threads.

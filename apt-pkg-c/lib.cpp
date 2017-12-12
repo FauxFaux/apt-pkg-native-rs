@@ -80,11 +80,13 @@ extern "C" {
     // ver_iter access
     const char *ver_iter_version(PVerIterator *iterator);
     const char *ver_iter_section(PVerIterator *iterator);
+    const char *ver_iter_arch(PVerIterator *iterator);
+
+#ifndef YE_OLDE_APT
     const char *ver_iter_source_package(PVerIterator *iterator);
     const char *ver_iter_source_version(PVerIterator *iterator);
-    const char *ver_iter_arch(PVerIterator *iterator);
     int32_t ver_iter_priority(PVerIterator *iterator);
-
+#endif
 
     // ver_file_iter creation and deletion
     PVerFileIterator *ver_iter_ver_file_iter(PVerIterator *iterator);
@@ -227,6 +229,8 @@ const char *ver_iter_section(PVerIterator *wrapper) {
    return wrapper->iterator.Section();
 }
 
+#ifndef YE_OLDE_APT
+
 const char *ver_iter_source_package(PVerIterator *wrapper) {
     return wrapper->iterator.SourcePkgName();
 }
@@ -235,15 +239,18 @@ const char *ver_iter_source_version(PVerIterator *wrapper) {
     return wrapper->iterator.SourceVerStr();
 }
 
-const char *ver_iter_arch(PVerIterator *wrapper) {
-    return wrapper->iterator.Arch();
-}
-
 int32_t ver_iter_priority(PVerIterator *wrapper) {
     // The priority is a "short", which is roughly a (signed) int16_t;
     // going bigger just in case
     return wrapper->cache->cache_file->GetPolicy()->GetPriority(wrapper->iterator);
 }
+
+#endif
+
+const char *ver_iter_arch(PVerIterator *wrapper) {
+    return wrapper->iterator.Arch();
+}
+
 
 PVerFileIterator *ver_iter_ver_file_iter(PVerIterator *wrapper) {
     PVerFileIterator *new_wrapper = new PVerFileIterator();

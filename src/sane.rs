@@ -238,6 +238,7 @@ impl<'c> VerView<'c> {
         unsafe { make_owned_ascii_string(raw::ver_iter_section(self.ptr)) }
     }
 
+    #[cfg(not(feature="ye-olde-apt"))]
     pub fn source_package(&self) -> String {
         unsafe {
             make_owned_ascii_string(raw::ver_iter_source_package(self.ptr))
@@ -245,6 +246,7 @@ impl<'c> VerView<'c> {
         }
     }
 
+    #[cfg(not(feature="ye-olde-apt"))]
     pub fn source_version(&self) -> String {
         unsafe {
             make_owned_ascii_string(raw::ver_iter_source_version(self.ptr))
@@ -252,6 +254,7 @@ impl<'c> VerView<'c> {
         }
     }
 
+    #[cfg(not(feature="ye-olde-apt"))]
     pub fn priority(&self) -> i32 {
         unsafe { raw::ver_iter_priority(self.ptr) }
     }

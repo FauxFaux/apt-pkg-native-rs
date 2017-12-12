@@ -24,3 +24,7 @@ libc = "0.2"
 [dev-dependencies]
 boolinator = "2"
 itertools = "0.7"
+
+[features]
+default = []
+ye-olde-apt = []

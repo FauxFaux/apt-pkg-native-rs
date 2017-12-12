@@ -67,9 +67,15 @@ extern "C" {
 
     pub fn ver_iter_version(iterator: PVerIterator) -> *mut c_char;
     pub fn ver_iter_section(iterator: PVerIterator) -> *mut c_char;
+
+    #[cfg(not(feature="ye-olde-apt"))]
     pub fn ver_iter_source_package(iterator: PVerIterator) -> *mut c_char;
+
+    #[cfg(not(feature="ye-olde-apt"))]
     pub fn ver_iter_source_version(iterator: PVerIterator) -> *mut c_char;
     pub fn ver_iter_arch(iterator: PVerIterator) -> *mut c_char;
+
+    #[cfg(not(feature="ye-olde-apt"))]
     pub fn ver_iter_priority(iterator: PVerIterator) -> i32;
 
     pub fn ver_iter_ver_file_iter(iterator: PVerIterator) -> PVerFileIterator;

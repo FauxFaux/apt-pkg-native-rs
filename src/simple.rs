@@ -41,8 +41,12 @@ pub struct Version {
     pub version: String,
     pub arch: String,
     pub section: Option<String>,
+
+    #[cfg(not(feature="ye-olde-apt"))]
     pub source_package: String,
+    #[cfg(not(feature="ye-olde-apt"))]
     pub source_version: String,
+    #[cfg(not(feature="ye-olde-apt"))]
     pub priority: i32,
 }
 
@@ -53,8 +57,11 @@ impl Version {
             version: view.version(),
             arch: view.arch(),
             section: view.section(),
+            #[cfg(not(feature="ye-olde-apt"))]
             source_package: view.source_package(),
+            #[cfg(not(feature="ye-olde-apt"))]
             source_version: view.source_version(),
+            #[cfg(not(feature="ye-olde-apt"))]
             priority: view.priority(),
         }
     }
@@ -66,13 +73,16 @@ impl fmt::Display for Version {
         if let Some(ref section) = self.section {
             write!(f, " in {}", section)?;
         }
+        #[cfg(not(feature="ye-olde-apt"))]
         write!(
             f,
             " from {}:{} at {}",
             self.source_package,
             self.source_version,
             self.priority,
-        )
+        )?;
+
+        Ok(())
     }
 }
 
