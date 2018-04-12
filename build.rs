@@ -10,7 +10,7 @@ fn main() {
     build.cpp(true);
     build.flag("-std=gnu++11");
 
-    #[cfg(feature="ye-olde-apt")]
+    #[cfg(feature = "ye-olde-apt")]
     {
         build.define("YE_OLDE_APT", "1");
     }

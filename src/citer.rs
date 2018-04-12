@@ -1,5 +1,5 @@
-use std::ops::Deref;
 use std::marker::PhantomData;
+use std::ops::Deref;
 
 pub trait RawIterator {
     type View;
@@ -100,7 +100,6 @@ where
 
         false
     }
-
 
     pub fn all<F>(mut self, mut f: F) -> bool
     where

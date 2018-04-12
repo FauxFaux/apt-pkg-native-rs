@@ -2,11 +2,10 @@
 ///  * `*mut c_void` are to be released by the appropriate function
 ///  * `*const c_chars` are short-term borrows
 ///  * `*mut c_chars` are to be freed by `libc::free`.
-
 use std::sync::Mutex;
 
-use libc::c_void;
 use libc::c_char;
+use libc::c_void;
 
 pub type PCache = *mut c_void;
 pub type PPkgIterator = *mut c_void;
@@ -43,7 +42,6 @@ extern "C" {
     pub fn pkg_iter_next(iterator: PPkgIterator);
     pub fn pkg_iter_end(iterator: PPkgIterator) -> bool;
 
-
     // Package iterator accessors
     // ==========================
 
@@ -51,7 +49,6 @@ extern "C" {
     pub fn pkg_iter_arch(iterator: PPkgIterator) -> *const c_char;
     pub fn pkg_iter_current_version(iterator: PPkgIterator) -> *const c_char;
     pub fn pkg_iter_candidate_version(iterator: PPkgIterator) -> *const c_char;
-
 
     // Version iterators
     // =================
@@ -68,14 +65,14 @@ extern "C" {
     pub fn ver_iter_version(iterator: PVerIterator) -> *mut c_char;
     pub fn ver_iter_section(iterator: PVerIterator) -> *mut c_char;
 
-    #[cfg(not(feature="ye-olde-apt"))]
+    #[cfg(not(feature = "ye-olde-apt"))]
     pub fn ver_iter_source_package(iterator: PVerIterator) -> *mut c_char;
 
-    #[cfg(not(feature="ye-olde-apt"))]
+    #[cfg(not(feature = "ye-olde-apt"))]
     pub fn ver_iter_source_version(iterator: PVerIterator) -> *mut c_char;
     pub fn ver_iter_arch(iterator: PVerIterator) -> *mut c_char;
 
-    #[cfg(not(feature="ye-olde-apt"))]
+    #[cfg(not(feature = "ye-olde-apt"))]
     pub fn ver_iter_priority(iterator: PVerIterator) -> i32;
 
     pub fn ver_iter_ver_file_iter(iterator: PVerIterator) -> PVerFileIterator;
@@ -84,13 +81,11 @@ extern "C" {
     pub fn ver_file_iter_next(iterator: PVerFileIterator);
     pub fn ver_file_iter_end(iterator: PVerFileIterator) -> bool;
 
-
     pub fn ver_file_iter_pkg_file_iter(iterator: PVerFileIterator) -> PPkgFileIterator;
     pub fn pkg_file_iter_release(iterator: PPkgFileIterator);
 
     pub fn pkg_file_iter_next(iterator: PPkgFileIterator);
     pub fn pkg_file_iter_end(iterator: PPkgFileIterator) -> bool;
-
 
     pub fn pkg_file_iter_file_name(iterator: PPkgFileIterator) -> *const c_char;
     pub fn pkg_file_iter_archive(iterator: PPkgFileIterator) -> *const c_char;
