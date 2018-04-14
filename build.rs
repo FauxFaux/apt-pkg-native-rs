@@ -1,11 +1,11 @@
-extern crate gcc;
+extern crate cc;
 
 const SRC: &str = "apt-pkg-c/lib.cpp";
 
 fn main() {
     println!("cargo:rerun-if-changed={}", SRC);
 
-    let mut build = gcc::Build::new();
+    let mut build = cc::Build::new();
     build.file(SRC);
     build.cpp(true);
     build.flag("-std=gnu++11");

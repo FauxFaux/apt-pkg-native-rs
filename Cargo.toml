@@ -15,7 +15,7 @@ version = "0.3.0"
 repository = "FauxFaux/apt-pkg-native-rs"
 
 [build-dependencies]
-gcc = "0.3"
+cc = "1.0"
 
 [dependencies]
 lazy_static = "1"
