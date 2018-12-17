@@ -1,8 +1,8 @@
 extern crate apt_pkg_native;
 use std::env;
 
-use apt_pkg_native::Cache;
 use apt_pkg_native::simple;
+use apt_pkg_native::Cache;
 
 fn main() {
     let pkg = env::args()
@@ -19,7 +19,8 @@ fn main() {
     if let Some(view) = found.next() {
         println!("{}:{}:", view.name(), view.arch());
 
-        let installed_version = view.current_version()
+        let installed_version = view
+            .current_version()
             .unwrap_or_else(|| "(none)".to_string());
         println!("  Installed: {}", installed_version);
         println!(

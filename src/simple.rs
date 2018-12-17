@@ -122,8 +122,11 @@ impl Origin {
 impl fmt::Display for Origin {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // trying to simulate apt-cache policy, but a lot of information is missing
-        if self.site.is_some() && self.origin.is_some() && self.label.is_some()
-            && self.codename.is_some() && self.architecture.is_some()
+        if self.site.is_some()
+            && self.origin.is_some()
+            && self.label.is_some()
+            && self.codename.is_some()
+            && self.architecture.is_some()
         {
             write!(
                 f,
@@ -153,7 +156,8 @@ impl VersionOrigins {
     pub fn new(view: &sane::VerView) -> Self {
         VersionOrigins {
             version: Version::new(view),
-            origins: view.origin_iter()
+            origins: view
+                .origin_iter()
                 .map(|o| {
                     Origin::from_ver_file(o)
                         .expect("a version's origin should always have a backing file")
