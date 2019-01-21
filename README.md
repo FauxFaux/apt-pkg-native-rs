@@ -18,7 +18,7 @@ While the code in this crate is available under a permissive MIT license,
 
 ### Building
 
-`libapt-pkg-dev` must be installed. The [`gcc`](https://crates.io/crates/gcc)
+`libapt-pkg-dev` must be installed. The [`cc`](https://crates.io/crates/cc)
   crate is used to try and find a native compiler.
 
 The `ye-olde-apt` feature provides support for `apt <1.2` (Ubuntu 14.04 (Trusty),
