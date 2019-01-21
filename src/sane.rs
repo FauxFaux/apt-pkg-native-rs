@@ -4,10 +4,10 @@ use std::marker::PhantomData;
 use std::sync::MutexGuard;
 
 use libc;
-use raw;
 
-use citer::CIterator;
-use citer::RawIterator;
+use crate::citer::CIterator;
+use crate::citer::RawIterator;
+use crate::raw;
 
 /// A reference to the package cache singleton,
 /// from which most functionality can be accessed.

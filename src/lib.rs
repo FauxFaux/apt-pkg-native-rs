@@ -31,16 +31,12 @@
 //! `libapt-pkg` also just segfaults if you do anything wrong, or re-use anything at the wrong time,
 //! or etc. I've tried to hide this, but I advise you not to push or outsmart the borrow checker.
 
-#[macro_use]
-extern crate lazy_static;
-extern crate libc;
-
 mod citer;
 mod raw;
 mod sane;
 pub mod simple;
 
-pub use sane::Cache;
+pub use crate::sane::Cache;
 
 #[cfg(test)]
 mod tests {

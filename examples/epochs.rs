@@ -1,6 +1,3 @@
-extern crate apt_pkg_native;
-extern crate boolinator;
-
 use apt_pkg_native::Cache;
 
 use boolinator::Boolinator;

@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+use std::collections::HashSet;
 /// A port of a randomly selected Python program:
 ///
 /// ```python
@@ -23,11 +25,7 @@
 ///         for ver in sorted(sources[src]):
 ///             print('{}={}'.format(src, ver))
 /// ```
-extern crate apt_pkg_native;
 use std::env;
-
-use std::collections::HashMap;
-use std::collections::HashSet;
 
 use apt_pkg_native::Cache;
 

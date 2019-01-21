@@ -2,7 +2,7 @@
 
 use std::fmt;
 
-use sane;
+use crate::sane;
 
 #[derive(Clone, Debug)]
 pub struct BinaryPackage {

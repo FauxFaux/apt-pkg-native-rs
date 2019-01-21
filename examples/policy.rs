@@ -1,4 +1,3 @@
-extern crate apt_pkg_native;
 use std::env;
 
 use apt_pkg_native::simple;

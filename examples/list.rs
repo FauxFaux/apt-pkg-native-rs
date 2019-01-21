@@ -1,6 +1,3 @@
-extern crate apt_pkg_native;
-extern crate itertools;
-
 use itertools::Itertools;
 
 use apt_pkg_native::simple;
