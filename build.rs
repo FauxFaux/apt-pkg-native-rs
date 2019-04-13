@@ -16,4 +16,6 @@ fn main() {
     }
 
     build.compile("libapt-pkg-c.a");
+
+    println!("cargo:rustc-link-lib=apt-pkg");
 }
