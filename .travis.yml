@@ -14,5 +14,5 @@ addons:
     - build-essential
     - libapt-pkg-dev
 
-dist: trusty
+dist: xenial
 sudo: false
