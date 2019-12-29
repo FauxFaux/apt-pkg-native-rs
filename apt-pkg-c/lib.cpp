@@ -7,6 +7,10 @@
 #include <apt-pkg/pkgcache.h>
 #include <apt-pkg/version.h>
 
+#include <apt-pkg/init.h>
+#include <apt-pkg/pkgsystem.h>
+#include <apt-pkg/policy.h>
+
 struct PCache {
     // Owned by us.
     pkgCacheFile *cache_file;
