@@ -72,6 +72,7 @@ extern "C" {
     #[cfg(not(feature = "ye-olde-apt"))]
     pub fn ver_iter_source_version(iterator: PVerIterator) -> *mut c_char;
     pub fn ver_iter_arch(iterator: PVerIterator) -> *mut c_char;
+    pub fn ver_iter_priority_type(iterator: PVerIterator) -> *mut c_char;
 
     #[cfg(not(feature = "ye-olde-apt"))]
     pub fn ver_iter_priority(iterator: PVerIterator) -> i32;
