@@ -17,6 +17,9 @@ struct PCache {
 
     // Borrowed from cache_file.
     pkgCache *cache;
+
+    // Owned by us.
+    pkgRecords *records;
 };
 
 struct PPkgIterator {
@@ -41,11 +44,18 @@ struct PVerIterator {
 struct PVerFileIterator {
     // Owned by us.
     pkgCache::VerFileIterator iterator;
+
+    // Borrow of "static" PCache.
+    PCache *cache;
 };
 
 struct PPkgFileIterator {
     // Owned by us.
     pkgCache::PkgFileIterator iterator;
+};
+
+struct PVerFileParser {
+    pkgRecords::Parser *parser;
 };
 
 extern "C" {
@@ -101,6 +111,15 @@ extern "C" {
     void ver_file_iter_next(PVerFileIterator *iterator);
     bool ver_file_iter_end(PVerFileIterator *iterator);
 
+    // ver_file_parser creation
+    PVerFileParser *ver_file_iter_get_parser(PVerFileIterator *iterator);
+
+    // ver_file_parser access
+    const char *ver_file_parser_short_desc(PVerFileParser *parser);
+    const char *ver_file_parser_long_desc(PVerFileParser *parser);
+    const char *ver_file_parser_maintainer(PVerFileParser *parser);
+    const char *ver_file_parser_homepage(PVerFileParser *parser);
+
     // ver_file_iter has no accessors, only the creation of pkg_file_iter
 
 
@@ -133,16 +152,19 @@ void init_config_system() {
 PCache *pkg_cache_create() {
     pkgCacheFile *cache_file = new pkgCacheFile();
     pkgCache *cache = cache_file->GetPkgCache();
+    pkgRecords *records = new pkgRecords(*cache);
 
     PCache *ret = new PCache();
     ret->cache_file = cache_file;
     ret->cache = cache;
+    ret->records = records;
 
     return ret;
 }
 
 void pkg_cache_release(PCache *cache) {
     // TODO: is cache->cache cleaned up with cache->cache_file?
+    delete cache->records;
     delete cache->cache_file;
     delete cache;
 }
@@ -264,6 +286,7 @@ const char *ver_iter_arch(PVerIterator *wrapper) {
 PVerFileIterator *ver_iter_ver_file_iter(PVerIterator *wrapper) {
     PVerFileIterator *new_wrapper = new PVerFileIterator();
     new_wrapper->iterator = wrapper->iterator.FileList();
+    new_wrapper->cache = wrapper->cache;
     return new_wrapper;
 }
 
@@ -273,6 +296,38 @@ void ver_file_iter_release(PVerFileIterator *wrapper) {
 
 void ver_file_iter_next(PVerFileIterator *wrapper) {
     ++wrapper->iterator;
+}
+
+PVerFileParser *ver_file_iter_get_parser(PVerFileIterator *wrapper) {
+    PVerFileParser *parser = new PVerFileParser();
+    parser->parser = &wrapper->cache->records->Lookup(wrapper->iterator);
+    return parser;
+}
+
+const char *to_c_string(std::string s) {
+    char *cstr = new char[s.length()+1];
+    std::strcpy(cstr, s.c_str());
+    return cstr;
+}
+
+const char *ver_file_parser_short_desc(PVerFileParser *parser) {
+    std::string desc = parser->parser->ShortDesc();
+    return to_c_string(desc);
+}
+
+const char *ver_file_parser_long_desc(PVerFileParser *parser) {
+    std::string desc = parser->parser->LongDesc();
+    return to_c_string(desc);
+}
+
+const char *ver_file_parser_maintainer(PVerFileParser *parser) {
+    std::string maint = parser->parser->Maintainer();
+    return to_c_string(maint);
+}
+
+const char *ver_file_parser_homepage(PVerFileParser *parser) {
+    std::string hp = parser->parser->Homepage();
+    return to_c_string(hp);
 }
 
 bool ver_file_iter_end(PVerFileIterator *wrapper) {
