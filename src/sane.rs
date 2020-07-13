@@ -237,6 +237,10 @@ impl<'c> VerView<'c> {
         unsafe { make_owned_ascii_string(raw::ver_iter_section(self.ptr)) }
     }
 
+    pub fn priority_type(&self) -> Option<String> {
+        unsafe { make_owned_ascii_string(raw::ver_iter_priority_type(self.ptr)) }
+    }
+
     #[cfg(not(feature = "ye-olde-apt"))]
     pub fn source_package(&self) -> String {
         unsafe {

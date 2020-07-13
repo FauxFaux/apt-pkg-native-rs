@@ -85,6 +85,7 @@ extern "C" {
     const char *ver_iter_version(PVerIterator *iterator);
     const char *ver_iter_section(PVerIterator *iterator);
     const char *ver_iter_arch(PVerIterator *iterator);
+    const char *ver_iter_priority_type(PVerIterator *wrapper);
 
 #ifndef YE_OLDE_APT
     const char *ver_iter_source_package(PVerIterator *iterator);
@@ -231,6 +232,10 @@ const char *ver_iter_version(PVerIterator *wrapper) {
 
 const char *ver_iter_section(PVerIterator *wrapper) {
    return wrapper->iterator.Section();
+}
+
+const char *ver_iter_priority_type(PVerIterator *wrapper) {
+    return wrapper->iterator.PriorityType();
 }
 
 #ifndef YE_OLDE_APT
