@@ -284,6 +284,7 @@ pub struct VerFileIterator<'c> {
 pub struct VerFileView<'c> {
     cache: PhantomData<&'c MutexGuard<'c, raw::CacheHolder>>,
     ptr: raw::PVerFileIterator,
+    parser: raw::PVerFileParser,
 }
 
 impl<'c> RawIterator for VerFileIterator<'c> {
@@ -300,9 +301,12 @@ impl<'c> RawIterator for VerFileIterator<'c> {
     fn as_view(&self) -> Self::View {
         assert!(!self.is_end());
 
+        let parser = unsafe { raw::ver_file_iter_get_parser(self.ptr) };
+
         VerFileView {
             ptr: self.ptr,
             cache: self.cache,
+            parser
         }
     }
 
@@ -320,6 +324,22 @@ impl<'c> VerFileView<'c> {
                 ptr: unsafe { raw::ver_file_iter_pkg_file_iter(self.ptr) },
             },
         }
+    }
+
+    pub fn short_desc(&self) -> Option<String> {
+        unsafe { make_owned_ascii_string(raw::ver_file_parser_short_desc(self.parser)) }
+    }
+
+    pub fn long_desc(&self) -> Option<String> {
+        unsafe { make_owned_ascii_string(raw::ver_file_parser_long_desc(self.parser)) }
+    }
+
+    pub fn maintainer(&self) -> Option<String> {
+        unsafe { make_owned_ascii_string(raw::ver_file_parser_maintainer(self.parser)) }
+    }
+
+    pub fn homepage(&self) -> Option<String> {
+        unsafe { make_owned_ascii_string(raw::ver_file_parser_homepage(self.parser)) }
     }
 }
 

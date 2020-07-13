@@ -13,6 +13,7 @@ pub type PPkgIterator = *mut c_void;
 pub type PVerIterator = *mut c_void;
 pub type PVerFileIterator = *mut c_void;
 pub type PPkgFileIterator = *mut c_void;
+pub type PVerFileParser = *mut c_void;
 
 #[link(name = "apt-pkg-c", kind = "static")]
 #[link(name = "apt-pkg")]
@@ -82,6 +83,12 @@ extern "C" {
 
     pub fn ver_file_iter_next(iterator: PVerFileIterator);
     pub fn ver_file_iter_end(iterator: PVerFileIterator) -> bool;
+
+    pub fn ver_file_iter_get_parser(iterator: PVerFileIterator) -> PVerFileParser;
+    pub fn ver_file_parser_short_desc(parser: PVerFileParser) -> *const c_char;
+    pub fn ver_file_parser_long_desc(parser: PVerFileParser) -> *const c_char;
+    pub fn ver_file_parser_maintainer(parser: PVerFileParser) -> *const c_char;
+    pub fn ver_file_parser_homepage(parser: PVerFileParser) -> *const c_char;
 
     pub fn ver_file_iter_pkg_file_iter(iterator: PVerFileIterator) -> PPkgFileIterator;
     pub fn pkg_file_iter_release(iterator: PPkgFileIterator);
