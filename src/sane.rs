@@ -322,14 +322,14 @@ impl<'c> VerFileView<'c> {
 /// An "iterator"/pointer to a point in a file list.
 pub struct PkgFileIterator<'c> {
     cache: PhantomData<&'c MutexGuard<'c, raw::CacheHolder>>,
-    ptr: raw::PVerFileIterator,
+    ptr: raw::PPkgFileIterator,
 }
 
 // TODO: could this be a ref to the iterator?
 // TODO: Can't get the lifetimes to work.
 pub struct PkgFileView<'c> {
     cache: PhantomData<&'c MutexGuard<'c, raw::CacheHolder>>,
-    ptr: raw::PVerFileIterator,
+    ptr: raw::PPkgFileIterator,
 }
 
 impl<'c> RawIterator for PkgFileIterator<'c> {
