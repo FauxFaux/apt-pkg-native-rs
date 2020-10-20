@@ -33,7 +33,7 @@
 
 mod citer;
 mod raw;
-mod sane;
+pub mod sane;
 pub mod simple;
 
 pub use crate::sane::Cache;
