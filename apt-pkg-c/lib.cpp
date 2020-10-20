@@ -41,6 +41,17 @@ struct PVerIterator {
     PCache *cache;
 };
 
+struct PDepIterator {
+    // Owned by us.
+    pkgCache::DepIterator iterator;
+
+    // Borrowed from PCache.
+    pkgCache::VerIterator *ver;
+
+    // Borrow of "static" PCache.
+    PCache *cache;
+};
+
 struct PVerFileIterator {
     // Owned by us.
     pkgCache::VerFileIterator iterator;
@@ -102,6 +113,20 @@ extern "C" {
     const char *ver_iter_source_version(PVerIterator *iterator);
     int32_t ver_iter_priority(PVerIterator *iterator);
 #endif
+
+    // dep_iter creation and deletion
+    PDepIterator *ver_iter_dep_iter(PVerIterator *iterator);
+    void dep_iter_release(PDepIterator *iterator);
+
+    // dep_iter mutation
+    void dep_iter_next(PDepIterator *iterator);
+    bool dep_iter_end(PDepIterator *iterator);
+
+    // dep_iter access
+    PPkgIterator *dep_iter_target_pkg(PDepIterator *iterator);
+    const char *dep_iter_target_ver(PDepIterator *iterator);
+    const char *dep_iter_comp_type(PDepIterator *iterator);
+    const char *dep_iter_dep_type(PDepIterator *iterator);
 
     // ver_file_iter creation and deletion
     PVerFileIterator *ver_iter_ver_file_iter(PVerIterator *iterator);
@@ -280,6 +305,45 @@ int32_t ver_iter_priority(PVerIterator *wrapper) {
 
 const char *ver_iter_arch(PVerIterator *wrapper) {
     return wrapper->iterator.Arch();
+}
+
+
+PDepIterator *ver_iter_dep_iter(PVerIterator *wrapper) {
+    PDepIterator *new_wrapper = new PDepIterator();
+    new_wrapper->iterator = wrapper->iterator.DependsList();
+    new_wrapper->cache = wrapper->cache;
+    return new_wrapper;
+}
+
+void dep_iter_release(PDepIterator *wrapper) {
+    delete wrapper;
+}
+
+void dep_iter_next(PDepIterator *wrapper) {
+    ++wrapper->iterator;
+}
+
+bool dep_iter_end(PDepIterator *wrapper) {
+    return wrapper->iterator.end();
+}
+
+PPkgIterator *dep_iter_target_pkg(PDepIterator *wrapper) {
+    PPkgIterator *new_wrapper = new PPkgIterator();
+    new_wrapper->iterator = wrapper->iterator.TargetPkg();
+    new_wrapper->cache = wrapper->cache;
+    return new_wrapper;
+}
+
+const char *dep_iter_target_ver(PDepIterator *wrapper) {
+    return wrapper->iterator.TargetVer();
+}
+
+const char *dep_iter_comp_type(PDepIterator *wrapper) {
+    return wrapper->iterator.CompType();
+}
+
+const char *dep_iter_dep_type(PDepIterator *wrapper) {
+    return wrapper->iterator.DepType();
 }
 
 

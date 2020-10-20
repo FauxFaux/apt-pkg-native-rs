@@ -181,6 +181,26 @@ impl<'c> PkgView<'c> {
     }
 }
 
+/// Represents a single PkgView without associated PkgIterator. Derefs to
+/// regular PkgView and releases the internal iterator on drop.
+pub struct SinglePkgView<'c> {
+    view: PkgView<'c>,
+}
+
+impl<'c> std::ops::Deref for SinglePkgView<'c> {
+    type Target = PkgView<'c>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.view
+    }
+}
+
+impl<'c> Drop for SinglePkgView<'c> {
+    fn drop(&mut self) {
+        unsafe { raw::pkg_iter_release(self.view.ptr); }
+    }
+}
+
 /// An "iterator"/pointer to a point in a version list.
 pub struct VerIterator<'c> {
     cache: PhantomData<&'c MutexGuard<'c, raw::CacheHolder>>,
@@ -269,6 +289,86 @@ impl<'c> VerView<'c> {
                 cache: PhantomData,
                 ptr: unsafe { raw::ver_iter_ver_file_iter(self.ptr) },
             },
+        }
+    }
+
+    pub fn dep_iter(&self) -> CIterator<DepIterator> {
+        CIterator {
+            first: true,
+            raw: DepIterator {
+                cache: PhantomData,
+                ptr: unsafe { raw::ver_iter_dep_iter(self.ptr) },
+            },
+        }
+    }
+}
+
+/// An "iterator"/pointer to a point in a dependency list.
+pub struct DepIterator<'c> {
+    cache: PhantomData<&'c MutexGuard<'c, raw::CacheHolder>>,
+    ptr: raw::PDepIterator,
+}
+
+pub struct DepView<'c> {
+    cache: PhantomData<&'c MutexGuard<'c, raw::CacheHolder>>,
+    ptr: raw::PDepIterator,
+}
+
+impl<'c> RawIterator for DepIterator<'c> {
+    type View = DepView<'c>;
+
+    fn is_end(&self) -> bool {
+        unsafe { raw::dep_iter_end(self.ptr) }
+    }
+
+    fn next(&mut self) {
+        unsafe { raw::dep_iter_next(self.ptr) }
+    }
+
+    fn as_view(&self) -> Self::View {
+        assert!(!self.is_end());
+
+        DepView {
+            ptr: self.ptr,
+            cache: self.cache,
+        }
+    }
+
+    fn release(&mut self) {
+        unsafe { raw::dep_iter_release(self.ptr) }
+    }
+}
+
+/// Actual accessors
+impl<'c> DepView<'c> {
+    pub fn target_pkg(&self) -> SinglePkgView {
+        let ptr = unsafe { raw::dep_iter_target_pkg(self.ptr) };
+        SinglePkgView {
+            view: PkgView {
+                cache: self.cache,
+                ptr,
+            }
+        }
+    }
+
+    pub fn target_ver(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::dep_iter_target_ver(self.ptr))
+                .expect("dependency always has target version")
+        }
+    }
+
+    pub fn comp_type(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::dep_iter_comp_type(self.ptr))
+                .expect("dependency always has comp type")
+        }
+    }
+
+    pub fn dep_type(&self) -> String {
+        unsafe {
+            make_owned_ascii_string(raw::dep_iter_dep_type(self.ptr))
+                .expect("dependency always has dep type")
         }
     }
 }

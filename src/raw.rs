@@ -11,6 +11,7 @@ use libc::c_void;
 pub type PCache = *mut c_void;
 pub type PPkgIterator = *mut c_void;
 pub type PVerIterator = *mut c_void;
+pub type PDepIterator = *mut c_void;
 pub type PVerFileIterator = *mut c_void;
 pub type PPkgFileIterator = *mut c_void;
 pub type PVerFileParser = *mut c_void;
@@ -77,6 +78,23 @@ extern "C" {
 
     #[cfg(not(feature = "ye-olde-apt"))]
     pub fn ver_iter_priority(iterator: PVerIterator) -> i32;
+
+    // Dependency iterators
+    // ====================
+
+    pub fn ver_iter_dep_iter(iterator: PVerIterator) -> PDepIterator;
+    pub fn dep_iter_release(iterator: PDepIterator);
+
+    pub fn dep_iter_next(iterator: PDepIterator);
+    pub fn dep_iter_end(iterator: PDepIterator) -> bool;
+
+    // Dependency accessors
+    // ====================
+
+    pub fn dep_iter_target_pkg(iterator: PDepIterator) -> PPkgIterator;
+    pub fn dep_iter_target_ver(iterator: PDepIterator) -> *const c_char;
+    pub fn dep_iter_comp_type(iterator: PDepIterator) -> *const c_char;
+    pub fn dep_iter_dep_type(iterator: PDepIterator) -> *const c_char;
 
     pub fn ver_iter_ver_file_iter(iterator: PVerIterator) -> PVerFileIterator;
     pub fn ver_file_iter_release(iterator: PVerFileIterator);
