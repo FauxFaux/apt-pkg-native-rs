@@ -32,16 +32,15 @@ fn main() {
         for simple::VersionOrigins { version, origins } in
             view.versions().map(simple::VersionOrigins::new)
         {
-            println!(
-                " {} {} {}",
-                if version.version == installed_version {
-                    "***"
-                } else {
-                    "   "
-                },
-                version.version,
-                version.priority,
-            );
+            let marker = if version.version == installed_version {
+                "***"
+            } else {
+                "   "
+            };
+            #[cfg(not(feature = "ye-olde-apt"))]
+            println!(" {} {} {}", marker, version.version, version.priority,);
+            #[cfg(feature = "ye-olde-apt")]
+            println!(" {} {}", marker, version.version,);
 
             for origin in origins {
                 println!("       {:4} {}", "XXX", origin);

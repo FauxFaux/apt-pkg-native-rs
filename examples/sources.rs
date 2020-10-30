@@ -29,6 +29,12 @@ use std::env;
 
 use apt_pkg_native::Cache;
 
+#[cfg(feature = "ye-olde-apt")]
+fn main() {
+    eprintln!("ye-olde-apt pre-dates source versions")
+}
+
+#[cfg(not(feature = "ye-olde-apt"))]
 fn main() {
     let archive_filter = env::args().nth(1);
 
