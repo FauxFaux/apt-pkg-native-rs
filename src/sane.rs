@@ -197,7 +197,9 @@ impl<'c> std::ops::Deref for SinglePkgView<'c> {
 
 impl<'c> Drop for SinglePkgView<'c> {
     fn drop(&mut self) {
-        unsafe { raw::pkg_iter_release(self.view.ptr); }
+        unsafe {
+            raw::pkg_iter_release(self.view.ptr);
+        }
     }
 }
 
@@ -347,7 +349,7 @@ impl<'c> DepView<'c> {
             view: PkgView {
                 cache: self.cache,
                 ptr,
-            }
+            },
         }
     }
 
@@ -406,7 +408,7 @@ impl<'c> RawIterator for VerFileIterator<'c> {
         VerFileView {
             ptr: self.ptr,
             cache: self.cache,
-            parser
+            parser,
         }
     }
 
