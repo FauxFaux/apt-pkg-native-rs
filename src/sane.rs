@@ -3,8 +3,6 @@ use std::ffi;
 use std::marker::PhantomData;
 use std::sync::MutexGuard;
 
-use libc;
-
 use crate::citer::CIterator;
 use crate::citer::RawIterator;
 use crate::raw;
