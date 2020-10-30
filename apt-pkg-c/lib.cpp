@@ -5,6 +5,7 @@
 
 #include <apt-pkg/cachefile.h>
 #include <apt-pkg/pkgcache.h>
+#include <apt-pkg/pkgrecords.h>
 #include <apt-pkg/version.h>
 
 #include <apt-pkg/init.h>
