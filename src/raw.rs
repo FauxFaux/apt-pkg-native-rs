@@ -1,7 +1,7 @@
 /// In general:
 ///  * `*mut c_void` are to be released by the appropriate function
 ///  * `*const c_chars` are short-term borrows
-///  * `*mut c_chars` are to be freed by `libc::free`.
+///  * `*mut c_chars` are to be freed by their associated 'free' function
 use std::sync::Mutex;
 
 use lazy_static::lazy_static;
@@ -65,16 +65,16 @@ extern "C" {
     // Version accessors
     // =================
 
-    pub fn ver_iter_version(iterator: PVerIterator) -> *mut c_char;
-    pub fn ver_iter_section(iterator: PVerIterator) -> *mut c_char;
+    pub fn ver_iter_version(iterator: PVerIterator) -> *const c_char;
+    pub fn ver_iter_section(iterator: PVerIterator) -> *const c_char;
 
     #[cfg(not(feature = "ye-olde-apt"))]
-    pub fn ver_iter_source_package(iterator: PVerIterator) -> *mut c_char;
+    pub fn ver_iter_source_package(iterator: PVerIterator) -> *const c_char;
 
     #[cfg(not(feature = "ye-olde-apt"))]
-    pub fn ver_iter_source_version(iterator: PVerIterator) -> *mut c_char;
-    pub fn ver_iter_arch(iterator: PVerIterator) -> *mut c_char;
-    pub fn ver_iter_priority_type(iterator: PVerIterator) -> *mut c_char;
+    pub fn ver_iter_source_version(iterator: PVerIterator) -> *const c_char;
+    pub fn ver_iter_arch(iterator: PVerIterator) -> *const c_char;
+    pub fn ver_iter_priority_type(iterator: PVerIterator) -> *const c_char;
 
     #[cfg(not(feature = "ye-olde-apt"))]
     pub fn ver_iter_priority(iterator: PVerIterator) -> i32;
@@ -103,10 +103,12 @@ extern "C" {
     pub fn ver_file_iter_end(iterator: PVerFileIterator) -> bool;
 
     pub fn ver_file_iter_get_parser(iterator: PVerFileIterator) -> PVerFileParser;
-    pub fn ver_file_parser_short_desc(parser: PVerFileParser) -> *const c_char;
-    pub fn ver_file_parser_long_desc(parser: PVerFileParser) -> *const c_char;
-    pub fn ver_file_parser_maintainer(parser: PVerFileParser) -> *const c_char;
-    pub fn ver_file_parser_homepage(parser: PVerFileParser) -> *const c_char;
+    pub fn ver_file_parser_short_desc(parser: PVerFileParser) -> *mut c_char;
+    pub fn ver_file_parser_long_desc(parser: PVerFileParser) -> *mut c_char;
+    pub fn ver_file_parser_maintainer(parser: PVerFileParser) -> *mut c_char;
+    pub fn ver_file_parser_homepage(parser: PVerFileParser) -> *mut c_char;
+    pub fn ver_file_parser_free_str(ptr: *mut c_char);
+    pub fn ver_file_parser_free(parser: PVerFileParser);
 
     pub fn ver_file_iter_pkg_file_iter(iterator: PVerFileIterator) -> PPkgFileIterator;
     pub fn pkg_file_iter_release(iterator: PPkgFileIterator);
