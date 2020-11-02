@@ -37,6 +37,25 @@ impl fmt::Display for BinaryPackage {
 }
 
 #[derive(Clone, Debug)]
+pub struct VersionDetails {
+    pub short_desc: Option<String>,
+    pub long_desc: Option<String>,
+    pub maintainer: Option<String>,
+    pub homepage: Option<String>,
+}
+
+impl Default for VersionDetails {
+    fn default() -> Self {
+        Self {
+            short_desc: None,
+            long_desc: None,
+            maintainer: None,
+            homepage: None,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct Version {
     pub version: String,
     pub arch: String,
@@ -48,10 +67,24 @@ pub struct Version {
     pub source_version: String,
     #[cfg(not(feature = "ye-olde-apt"))]
     pub priority: i32,
+
+    pub details: VersionDetails,
 }
 
 impl Version {
     pub fn new(view: &sane::VerView) -> Self {
+        // assume there is either zero or only one set of details per version
+        let details = if let Some(ver_file) = view.origin_iter().next() {
+            VersionDetails {
+                short_desc: ver_file.short_desc(),
+                long_desc: ver_file.long_desc(),
+                maintainer: ver_file.maintainer(),
+                homepage: ver_file.homepage(),
+            }
+        } else {
+            Default::default()
+        };
+
         Version {
             version: view.version(),
             arch: view.arch(),
@@ -62,6 +95,7 @@ impl Version {
             source_version: view.source_version(),
             #[cfg(not(feature = "ye-olde-apt"))]
             priority: view.priority(),
+            details,
         }
     }
 }
