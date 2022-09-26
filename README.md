@@ -44,6 +44,12 @@ some operations are thread safe: it should be possible to initialise the cache
 twice in parallel. As these versions of `apt` are not widespread, the API of
 this crate does not attempt to expose this.
 
+
+### Alternatives
+
+There is a similar project at [rust-apt](https://crates.io/crates/rust-apt).
+
+
 ### Switching distro with `docker`
 
 `examples/on-sid` has a docker file which builds a minimum Debian image with
