@@ -42,8 +42,11 @@ fn main() {
             #[cfg(feature = "ye-olde-apt")]
             println!(" {} {}", marker, version.version,);
 
+            println!("       {} {}", "Desc:",
+                version.details.short_desc.unwrap_or("-".to_owned()));
+
             for origin in origins {
-                println!("       {:4} {}", "XXX", origin);
+                println!("       {} {}", "Orig:", origin);
             }
         }
     } else {

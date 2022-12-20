@@ -146,7 +146,12 @@ extern "C" {
     const char *ver_file_parser_maintainer(PVerFileParser *parser);
     const char *ver_file_parser_homepage(PVerFileParser *parser);
 
-    // ver_file_iter has no accessors, only the creation of pkg_file_iter
+    // parser data needs manual freeing
+    void ver_file_parser_free_str(char *ptr);
+    void ver_file_parser_free(PVerFileParser *parser);
+
+    // PVerFileIterator has no accessors, only the creation of PPkgFileIterator
+    // and PVerFileParser
 
 
     // pkg_file_iter creation
@@ -369,6 +374,7 @@ PVerFileParser *ver_file_iter_get_parser(PVerFileIterator *wrapper) {
     return parser;
 }
 
+// must be freed with ver_file_parser_free_str
 const char *to_c_string(std::string s) {
     char *cstr = new char[s.length()+1];
     std::strcpy(cstr, s.c_str());
@@ -393,6 +399,14 @@ const char *ver_file_parser_maintainer(PVerFileParser *parser) {
 const char *ver_file_parser_homepage(PVerFileParser *parser) {
     std::string hp = parser->parser->Homepage();
     return to_c_string(hp);
+}
+
+void ver_file_parser_free_str(char *ptr) {
+    delete ptr;
+}
+
+void ver_file_parser_free(PVerFileParser *parser) {
+    delete parser;
 }
 
 bool ver_file_iter_end(PVerFileIterator *wrapper) {

@@ -379,12 +379,31 @@ pub struct VerFileIterator<'c> {
     ptr: raw::PVerFileIterator,
 }
 
+struct SafeVerFileParser {
+    ptr: raw::PVerFileParser,
+}
+
+impl SafeVerFileParser {
+    fn new(ver_file: raw::PVerFileIterator) -> Self {
+        let ptr = unsafe { raw::ver_file_iter_get_parser(ver_file) };
+        Self {
+            ptr,
+        }
+    }
+}
+
+impl Drop for SafeVerFileParser {
+    fn drop(&mut self) {
+        unsafe { raw::ver_file_parser_free(self.ptr); }
+    }
+}
+
 // TODO: could this be a ref to the iterator?
 // TODO: Can't get the lifetimes to work.
 pub struct VerFileView<'c> {
     cache: PhantomData<&'c MutexGuard<'c, raw::CacheHolder>>,
     ptr: raw::PVerFileIterator,
-    parser: raw::PVerFileParser,
+    parser: SafeVerFileParser,
 }
 
 impl<'c> RawIterator for VerFileIterator<'c> {
@@ -401,7 +420,7 @@ impl<'c> RawIterator for VerFileIterator<'c> {
     fn as_view(&self) -> Self::View {
         assert!(!self.is_end());
 
-        let parser = unsafe { raw::ver_file_iter_get_parser(self.ptr) };
+        let parser = SafeVerFileParser::new(self.ptr);
 
         VerFileView {
             ptr: self.ptr,
@@ -426,20 +445,32 @@ impl<'c> VerFileView<'c> {
         }
     }
 
+    unsafe fn retrieve_str(
+        &self,
+        f: unsafe extern "C" fn(raw::PVerFileParser) -> *mut libc::c_char
+    ) -> Option<String> {
+        let ptr = f(self.parser.ptr);
+        let ret = make_owned_ascii_string(ptr);
+        if !ptr.is_null() {
+            raw::ver_file_parser_free_str(ptr);
+        }
+        ret
+    }
+
     pub fn short_desc(&self) -> Option<String> {
-        unsafe { make_owned_ascii_string(raw::ver_file_parser_short_desc(self.parser)) }
+        unsafe { self.retrieve_str(raw::ver_file_parser_short_desc) }
     }
 
     pub fn long_desc(&self) -> Option<String> {
-        unsafe { make_owned_ascii_string(raw::ver_file_parser_long_desc(self.parser)) }
+        unsafe { self.retrieve_str(raw::ver_file_parser_long_desc) }
     }
 
     pub fn maintainer(&self) -> Option<String> {
-        unsafe { make_owned_ascii_string(raw::ver_file_parser_maintainer(self.parser)) }
+        unsafe { self.retrieve_str(raw::ver_file_parser_maintainer) }
     }
 
     pub fn homepage(&self) -> Option<String> {
-        unsafe { make_owned_ascii_string(raw::ver_file_parser_homepage(self.parser)) }
+        unsafe { self.retrieve_str(raw::ver_file_parser_homepage) }
     }
 }
 
