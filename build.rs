@@ -8,7 +8,7 @@ fn main() {
     let mut build = cc::Build::new();
     build.file(SRC);
     build.cpp(true);
-    build.flag("-std=gnu++11");
+    build.flag("-std=gnu++17");
 
     #[cfg(feature = "ye-olde-apt")]
     {
