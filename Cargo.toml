@@ -25,7 +25,7 @@ libc = "0.2"
 
 [dev-dependencies]
 boolinator = "2"
-itertools = "0.9"
+itertools = "0.14"
 
 [features]
 default = []
