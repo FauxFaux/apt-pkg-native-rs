@@ -1,8 +1,5 @@
 This crate provides bindings to `libapt-pkg`.
 
-[![Build status](https://api.travis-ci.org/FauxFaux/apt-pkg-native-rs.png)](https://travis-ci.org/FauxFaux/apt-pkg-native-rs)
-[![](http://meritbadge.herokuapp.com/apt-pkg-native)](https://crates.io/crates/apt-pkg-native)
-
 
 ### Documentation and Examples
 
