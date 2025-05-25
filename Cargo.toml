@@ -13,9 +13,6 @@ version = "0.3.2"
 
 edition = "2018"
 
-[badges.travis-ci]
-repository = "FauxFaux/apt-pkg-native-rs"
-
 [build-dependencies]
 cc = "1.0"
 

@@ -27,10 +27,10 @@ impl fmt::Display for BinaryPackage {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}:{}", self.name, self.arch)?;
         if let Some(ref version) = self.current_version {
-            write!(f, " @ {}", version)?;
+            write!(f, " @ {version}")?;
         }
         if let Some(ref version) = self.candidate_version {
-            write!(f, " -> {}", version)?;
+            write!(f, " -> {version}")?;
         }
         Ok(())
     }
@@ -70,7 +70,7 @@ impl fmt::Display for Version {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}:{}", self.version, self.arch)?;
         if let Some(ref section) = self.section {
-            write!(f, " in {}", section)?;
+            write!(f, " in {section}")?;
         }
         #[cfg(not(feature = "ye-olde-apt"))]
         write!(
@@ -99,8 +99,7 @@ pub struct Origin {
 
 impl Origin {
     pub fn from_ver_file(view: &sane::VerFileView) -> Option<Self> {
-        // TODO: don't think this deref-ref should really be necessary?
-        view.file().next().map(|x| Self::new(&*x))
+        view.file().next().map(|x| Self::new(&x))
     }
 
     pub fn new(view: &sane::PkgFileView) -> Self {
