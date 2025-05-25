@@ -22,6 +22,7 @@ The `ye-olde-apt` feature provides support for `apt <1.2` (Ubuntu 14.04 (Trusty)
 Debian 7 (Jessie) (2015)). This works by just deleting methods which are not
 available in that version. See
 [#2](https://github.com/FauxFaux/apt-pkg-native-rs/issues/2#issuecomment-351180818).
+This feature is no longer tested on CI, as these distros are long gone.
 
 
 ### Thread safety
