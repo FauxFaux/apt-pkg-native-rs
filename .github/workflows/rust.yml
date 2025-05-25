@@ -11,17 +11,28 @@ env:
 
 jobs:
   build:
+    # the inefficiency here is outrageous; don't copy this into other projects;
+    # it's only vaguely acceptable here because this project is low volume
     strategy:
       matrix:
-        os: [ubuntu-25.04, ubuntu-22.04, ubuntu-20.04, ubuntu-18.04]
+        buildpack:
+          - bionic    # 2018; apt 1.6
+          - buster    # 2019; apt 1.8
+          - focal     # 2020; apt 2.0
+          - bullseye  # 2021; apt 2.2
+          - jammy     # 2022; apt 2.4
+          - bookworm  # 2023; apt 2.6
+          - noble     # 2024; apt 2.7
+          - trixie    # 2025ish;  3.0-ish
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
-    - name: Install requirements
-      run: sudo apt-get install -y libapt-pkg-dev
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
+
+    - name: Test under ${{ matrix.buildpack }}
+      run: |
+        docker build -t img \
+          --build-arg BASE_VERSION=${{ matrix.buildpack }} \
+          --file ci.Dockerfile .
+        docker run --rm img cargo test --verbose
