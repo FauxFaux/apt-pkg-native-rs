@@ -526,15 +526,18 @@ impl<'c> PkgFileView<'c> {
     }
 }
 
+#[inline]
 unsafe fn make_owned_ascii_string(ptr: *const libc::c_char) -> Option<String> {
     if ptr.is_null() {
-        None
-    } else {
-        Some(
-            ffi::CStr::from_ptr(ptr)
-                .to_str()
-                .expect("value should always be low-ascii")
-                .to_string(),
-        )
+        return None;
     }
+
+    let string = unsafe {
+        ffi::CStr::from_ptr(ptr)
+            .to_str()
+            .expect("value should always be low-ascii")
+            .to_string()
+    };
+
+    Some(string)
 }

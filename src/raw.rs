@@ -18,7 +18,7 @@ pub type PVerFileParser = *mut c_void;
 
 #[link(name = "apt-pkg-c", kind = "static")]
 #[link(name = "apt-pkg")]
-extern "C" {
+unsafe extern "C" {
     /// Must be called exactly once, before anything else?
     fn init_config_system();
     fn pkg_cache_create() -> PCache;

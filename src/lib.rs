@@ -54,10 +54,9 @@ mod tests {
     fn find_a_package() {
         let mut cache = Cache::get_singleton();
 
-        if let Some(view) = cache.find_by_name("apt").next() {
-            assert_eq!("apt", view.name());
-        } else {
-            panic!("not found!");
+        match cache.find_by_name("apt").next() {
+            Some(view) => assert_eq!("apt", view.name()),
+            _ => panic!("not found!"),
         }
 
         assert!(cache
