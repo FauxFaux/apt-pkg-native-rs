@@ -59,10 +59,14 @@ mod tests {
             _ => panic!("not found!"),
         }
 
-        assert!(cache
-            .find_by_name("this-package-doesnt-exist-and-if-someone-makes-it-ill-be-really-angry")
-            .next()
-            .is_none());
+        assert!(
+            cache
+                .find_by_name(
+                    "this-package-doesnt-exist-and-if-someone-makes-it-ill-be-really-angry"
+                )
+                .next()
+                .is_none()
+        );
     }
 
     #[test]

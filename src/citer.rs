@@ -52,7 +52,7 @@ impl<R> CIterator<R>
 where
     R: RawIterator,
 {
-    pub fn next(&mut self) -> Option<Borrowed<R>> {
+    pub fn next(&mut self) -> Option<Borrowed<'_, R>> {
         if self.raw.is_end() {
             return None;
         }

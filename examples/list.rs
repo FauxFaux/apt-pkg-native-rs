@@ -1,7 +1,7 @@
 use itertools::Itertools;
 
-use apt_pkg_native::simple;
 use apt_pkg_native::Cache;
+use apt_pkg_native::simple;
 
 fn main() {
     let mut cache = Cache::get_singleton();

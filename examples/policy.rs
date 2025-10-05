@@ -1,7 +1,7 @@
 use std::env;
 
-use apt_pkg_native::simple;
 use apt_pkg_native::Cache;
+use apt_pkg_native::simple;
 
 fn main() {
     let pkg = env::args()

@@ -37,7 +37,7 @@ impl Cache {
     /// If there are multiple architectures, multiple architectures will be returned.
     ///
     /// See the module documentation for apologies about how this isn't an iterator.
-    pub fn iter(&mut self) -> CIterator<PkgIterator> {
+    pub fn iter(&mut self) -> CIterator<PkgIterator<'_>> {
         let lock = self.ptr_mutex.lock().expect("poisoned mutex");
         unsafe {
             let raw_iter = raw::pkg_cache_pkg_iter(lock.ptr);
@@ -49,7 +49,7 @@ impl Cache {
     /// or the primary one.
     ///
     /// The returned iterator will either be at the end, or at a package with the name.
-    pub fn find_by_name(&mut self, name: &str) -> CIterator<PkgIterator> {
+    pub fn find_by_name(&mut self, name: &str) -> CIterator<PkgIterator<'_>> {
         let lock = self.ptr_mutex.lock().expect("poisoned mutex");
         unsafe {
             let name = ffi::CString::new(name).unwrap();
@@ -61,7 +61,7 @@ impl Cache {
     /// Find a package by name and architecture.
     ///
     /// The returned iterator will either be at the end, or at a matching package.
-    pub fn find_by_name_arch(&mut self, name: &str, arch: &str) -> CIterator<PkgIterator> {
+    pub fn find_by_name_arch(&mut self, name: &str, arch: &str) -> CIterator<PkgIterator<'_>> {
         let lock = self.ptr_mutex.lock().expect("poisoned mutex");
         unsafe {
             let name = ffi::CString::new(name).unwrap();
@@ -99,7 +99,7 @@ impl Cache {
 /// An "iterator"/pointer to a point in a package list.
 #[derive(Debug)]
 pub struct PkgIterator<'c> {
-    cache: MutexGuard<'c, raw::CacheHolder>,
+    _cache: MutexGuard<'c, raw::CacheHolder>,
     ptr: raw::PPkgIterator,
 }
 
@@ -107,7 +107,7 @@ impl<'c> PkgIterator<'c> {
     fn new(cache: MutexGuard<'c, raw::CacheHolder>, ptr: raw::PCache) -> CIterator<Self> {
         CIterator {
             first: true,
-            raw: PkgIterator { cache, ptr },
+            raw: PkgIterator { _cache: cache, ptr },
         }
     }
 }
@@ -168,7 +168,7 @@ impl<'c> PkgView<'c> {
         unsafe { make_owned_ascii_string(raw::pkg_iter_candidate_version(self.ptr)) }
     }
 
-    pub fn versions(&self) -> CIterator<VerIterator> {
+    pub fn versions(&self) -> CIterator<VerIterator<'_>> {
         CIterator {
             first: true,
             raw: VerIterator {
@@ -282,7 +282,7 @@ impl<'c> VerView<'c> {
         unsafe { raw::ver_iter_priority(self.ptr) }
     }
 
-    pub fn origin_iter(&self) -> CIterator<VerFileIterator> {
+    pub fn origin_iter(&self) -> CIterator<VerFileIterator<'_>> {
         CIterator {
             first: true,
             raw: VerFileIterator {
@@ -292,7 +292,7 @@ impl<'c> VerView<'c> {
         }
     }
 
-    pub fn dep_iter(&self) -> CIterator<DepIterator> {
+    pub fn dep_iter(&self) -> CIterator<DepIterator<'_>> {
         CIterator {
             first: true,
             raw: DepIterator {
@@ -341,7 +341,7 @@ impl<'c> RawIterator for DepIterator<'c> {
 
 /// Actual accessors
 impl<'c> DepView<'c> {
-    pub fn target_pkg(&self) -> SinglePkgView {
+    pub fn target_pkg(&self) -> SinglePkgView<'_> {
         let ptr = unsafe { raw::dep_iter_target_pkg(self.ptr) };
         SinglePkgView {
             view: PkgView {
@@ -416,7 +416,7 @@ impl<'c> RawIterator for VerFileIterator<'c> {
 }
 
 impl<'c> VerFileView<'c> {
-    pub fn file(&self) -> CIterator<PkgFileIterator> {
+    pub fn file(&self) -> CIterator<PkgFileIterator<'_>> {
         CIterator {
             first: true,
             raw: PkgFileIterator {
